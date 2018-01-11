@@ -1,5 +1,6 @@
 # Ignore config file
 config.xml
+Import-BitBucket.ps1
 
 #######
 # Excerpts from https://www.gitignore.io
