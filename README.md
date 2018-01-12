@@ -6,11 +6,6 @@ Import module with the PSM1 was having issues with PSD1
 
 BitBucketPS is a Windows PowerShell module to interact with [Atlassian bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
 
----
-
-## Project update: November 2016
-
----
 
 ## Requirements
 
