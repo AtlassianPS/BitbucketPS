@@ -1,23 +1,24 @@
-function Get-BranchList {    
-[CmdletBinding()]
-param (
-    [PSCredential]$credential, 
-    [string]$Repo
-)
+Function Get-BBBranchList {    
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory)]
+        [string]$Repo
+    )
 
-    $server = Get-BitbucketConfigServer
-    $ProjectKey = Get-ProjectKey -repo $Repo -credential $credential
+    ValidateBBSession
 
-    Write-Verbose "
-    Getting Branches:
-    RepoName: $Repo
-    ProjectKey: $ProjectKey
-    Server: $Server
-    "
+    $ProjectKeys = Get-BBProjectKey -Repo $Repo
+    ForEach ($ProjectKey in $ProjectKeys)
+    {
+        Write-Verbose "Getting Branches:"
+        Write-Verbose "         Repo: $Repo"
+        Write-Verbose "   ProjectKey: $ProjectKey"
+        Write-Verbose "       Server: $($Global:BBSession.Server)"
 
-    $uri = "$server/rest/api/1.0/projects/$ProjectKey/repos/$Repo/branches"
+        $Uri = "$($Global:BBSession.Server)/rest/api/1.0/projects/$ProjectKey/repos/$Repo/branches"
+        $Branches = Invoke-BBMethod -Uri $uri -Credential $Global:BBSession.Credential -Method GET
 
-    $Branches = Invoke-BitBucketMethod -uri $uri -credential $credential -method GET
-    
-    return $Branches.values
+        $Branches | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey
+        Write-Output $Branches
+    }
 }

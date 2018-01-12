@@ -1,4 +1,4 @@
-﻿Function Connect-BBServer
+﻿Function New-BBSession
 {
     <#
     .SYNOPSIS
@@ -46,13 +46,13 @@
 
     Try {
         $User = Invoke-BBMethod -URI "$Server/rest/api/latest/users/$($Credential.UserName)" -Method Get -Credential $Credential
-        $Global:BBConnect = [PSCustomObject]@{
+        $Global:BBSession = [PSCustomObject]@{
             Credential = $Credential
             Server     = $Server
         }
         Write-Verbose "Successfully connected to BitBucket at $Server"
     }
     Catch {
-        Write-Error "Unable to connect to BitBucket because ""$_""" -ErrorAction Stop
+        Write-Error "Unable to connect to BitBucket at $Server because ""$_""" -ErrorAction Stop
     }
 }

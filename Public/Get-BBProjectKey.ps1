@@ -1,18 +1,15 @@
-function Get-ProjectKey {    
-[CmdletBinding()]
-param (
-    [PSCredential]$credential, 
-    [string]$Repo
-)
+Function Get-BBProjectKey {    
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory)]
+        [string]$Repo
+    )
 
+    ValidateBBSession
 
-Write-Verbose "
-    Getting Project Key of:
-    RepoName: $Repo
-    Server: $Server
-    "
-$RepoObj = Get-Repositories -credential $credential| where-object slug -match $Repo
+    Write-Verbose "Getting Project Key of:"
+    Write-Verbose "   RepoName: $Repo"
+    Write-Verbose "     Server: $($Global:BBSession.Server)"
 
-$RepoObj.project.key
-
+    Get-BBRepositories | Where-Object slug -match $Repo | Select -ExpandProperty Project | Select -ExpandProperty Key
 }

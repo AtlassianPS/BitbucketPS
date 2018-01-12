@@ -1,20 +1,16 @@
-function Get-Repositories {    
-[CmdletBinding()]
-param (
-    [PSCredential]$credential, 
-    [string]$Repo
-)
+function Get-BBRepositories {    
+    [CmdletBinding()]
+    Param (
+        [string]$Repo
+    )
 
-    $server = Get-BitbucketConfigServer
-    
-    Write-Verbose "
-    Getting Repos:
-    RepoName: $Repo
-    Server: $Server
-    "
+    ValidateBBSession
+   
+    Write-Verbose "Getting Repos:"
+    Write-Verbose "   RepoName: $Repo"
+    Write-Verbose "     Server: $($Global:BBSession.Server)"
 
-    $uri = "$server/rest/api/1.0/repos"
+    $Uri = "$($Global:BBSession.Server)/rest/api/1.0/repos"
 
-    $Repos = Invoke-BitBucketMethod -uri $uri -credential $credential -method GET
-    return $Repos.values
+    Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
 }
