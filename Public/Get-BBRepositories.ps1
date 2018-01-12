@@ -1,4 +1,4 @@
-function Get-BBRepositories {    
+Function Get-BBRepositories {    
     [CmdletBinding()]
     Param (
         [string]$Repo
@@ -12,5 +12,5 @@ function Get-BBRepositories {
 
     $Uri = "$($Global:BBSession.Server)/rest/api/1.0/repos"
 
-    Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
+    Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET | Where name -match $Repo
 }
