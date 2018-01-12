@@ -19,13 +19,13 @@ Function Get-BBCommits {
         $ProjectKeys = $ProjectKeys | Where { -not $_.Contains("~") }
     }
 
-    Write-Verbose "Getting Commits:"
-    Write-Verbose "   RepoName: $Repo"
-    Write-Verbose " ProjectKey: $ProjectKey"
-    Write-Verbose "     Server: $($Global:BBSession.Server)"
-
     ForEach ($ProjectKey in $ProjectKeys)
     {
+        Write-Verbose "Getting Commits:"
+        Write-Verbose "   RepoName: $Repo"
+        Write-Verbose " ProjectKey: $ProjectKey"
+        Write-Verbose "     Server: $($Global:BBSession.Server)"
+
         $Uri = "$($Global:BBSession.Server)/rest/api/1.0/projects/$ProjectKey/repos/$Repo/commits"
         $CommitObj = Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
         $CommitObj | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey

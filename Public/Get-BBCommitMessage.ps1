@@ -11,15 +11,21 @@ Function Get-BBCommitMessage {
         [string]$Project
     )
 
-
     Write-Verbose "Getting Commit Messages:"
     Write-Verbose "   RepoName: $Repo"
     Write-Verbose "     Server: $Server"
+
+    $BBCommitsSplat = @{
+        Repo = $Repo
+    }
+    If ($ExcludePersonalProjects)
+    {
+        $BBCommitsSplat.Add("ExcludePersonalProjects",$true)
+    }
+    If ($Project)
+    {
+        $BBCommitsSplat.Add("Project",$Project)
+    }
        
-    If(!$branch){ 
-    Get-Commits -credential $Credential -Repo $Repo | ft @{Name="commitId";expression={$_.displayID}},@{Name="Author";expression={$_.author.displayName}},message -Wrap
-    }
-    Else{
-    Get-CommitsForBranch -credential $Credential -Repo $Repo -Branch $Branch | ft @{Name="commitId";expression={$_.displayID}},@{Name="Author";expression={$_.author.displayName}},message -Wrap
-    }
+    Get-BBCommits @BBCommitsSplat | Select @{Name="commitId";Expression={ $_.displayID }},@{Name="Author";Expression={ $_.author.displayName }},@{Name="TimeStamp";Expression={ (Get-Date "1/1/1970").AddMilliseconds($_.committerTimestamp) }},Project,Message 
 }

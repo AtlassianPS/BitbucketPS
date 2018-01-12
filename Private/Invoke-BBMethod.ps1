@@ -49,7 +49,12 @@ function Invoke-BBMethod
 
     #BitBucket returns paged results, let's get the pages (if there are some)
     Do {
-        $webResponse = Invoke-WebRequest @iwrSplat
+        Try {
+            $webResponse = Invoke-WebRequest @iwrSplat
+        }
+        Catch {
+            Write-Error "Unable to process query because ""$_""" -ErrorAction Stop
+        }
         $Result = $webResponse.Content | ConvertFrom-Json
 
         
@@ -78,7 +83,4 @@ function Invoke-BBMethod
             Break
         }
     } While ($true)
-    write-verbose "Retrieved all data"
 }
-
-
