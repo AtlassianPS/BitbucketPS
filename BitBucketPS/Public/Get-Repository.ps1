@@ -1,4 +1,4 @@
-Function Get-BBRepositories {    
+Function Get-Repository {
     [CmdletBinding()]
     Param (
         [string]$Repo,
@@ -7,15 +7,15 @@ Function Get-BBRepositories {
         [switch]$ExcludePersonalProjects
     )
 
-    ValidateBBSession
-   
+    Validate-Session
+
     Write-Verbose "Getting Repos:"
     Write-Verbose "   RepoName: $Repo"
     Write-Verbose "     Server: $($Global:BBSession.Server)"
 
     $Uri = "/repos"
 
-    $RepoObj = Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET | Where name -match $Repo
+    $RepoObj = Invoke-Method -Uri $Uri -Credential $Global:BBSession.Credential -Method GET | Where name -match $Repo
     If ($ExcludePersonalProjects)
     {
         $RepoObj = $RepoObj | Where { -not $_.project.key.Contains("~") }

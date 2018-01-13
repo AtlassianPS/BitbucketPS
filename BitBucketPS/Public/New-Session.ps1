@@ -1,4 +1,4 @@
-﻿Function New-BBSession
+﻿Function New-Session
 {
     <#
     .SYNOPSIS
@@ -27,25 +27,25 @@
         $XmlConfig = $Xml.DocumentElement
         If ($XmlConfig.LocalName -ne 'Config')
         {
-            Write-Error "Unexpected document element [$($XmlConfig.LocalName)] in configuration file [$ConfigFile]. You may need to delete the config file and recreate it using Set-BBConfigServer." -ErrorAction Stop
+            Write-Error "Unexpected document element [$($XmlConfig.LocalName)] in configuration file [$ConfigFile]. You may need to delete the config file and recreate it using Set-ConfigServer." -ErrorAction Stop
         }
 
         If ($XmlConfig.Server)
         {
             $Server = $XmlConfig.Server
-        } 
-        Else 
+        }
+        Else
         {
-            Write-Error "No Server element is defined in the config file.  Use Set-BBConfigServer to define one." -ErrorAction Stop
+            Write-Error "No Server element is defined in the config file.  Use Set-ConfigServer to define one." -ErrorAction Stop
         }
     }
     Else
     {
-        Write-Error "BBconfig.XML has not been defined.  Run Set-BBConfigServer" -ErrorAction Stop
+        Write-Error "BBconfig.XML has not been defined.  Run Set-ConfigServer" -ErrorAction Stop
     }
 
     Try {
-        $User = Invoke-BBMethod -URI "$Server/rest/api/latest/users/$($Credential.UserName)" -Method Get -Credential $Credential
+        $User = Invoke-Method -URI "$Server/rest/api/latest/users/$($Credential.UserName)" -Method Get -Credential $Credential
         $Global:BBSession = [PSCustomObject]@{
             Credential   = $Credential
             URI          = "$Server/rest/api/latest"

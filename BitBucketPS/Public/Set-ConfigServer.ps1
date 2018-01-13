@@ -1,4 +1,4 @@
-Function Set-BBConfigServer
+Function Set-ConfigServer
 {
     <#
     .Synopsis
@@ -45,8 +45,8 @@ Function Set-BBConfigServer
     {
         $xml = [XML] '<Config></Config>'
 
-    } 
-    Else 
+    }
+    Else
     {
         $xml = New-Object -TypeName XML
         $xml.Load($ConfigFile)
@@ -68,8 +68,8 @@ Function Set-BBConfigServer
     If ($xmlConfig.Server)
     {
         $xmlConfig.Server = $fixedServer
-    } 
-    Else 
+    }
+    Else
     {
         $xmlServer = $xml.CreateElement('Server')
         $xmlServer.InnerText = $fixedServer
@@ -78,7 +78,7 @@ Function Set-BBConfigServer
 
     Try {
         $xml.Save($ConfigFile)
-    } 
+    }
     Catch {
         Write-Error "Unable to save $ConfigFile because ""$_""" -ErrorAction Stop
     }

@@ -1,4 +1,4 @@
-function Invoke-BBMethod
+function Invoke-Method
 {
     #Requires -Version 3
     [CmdletBinding()]
@@ -58,7 +58,7 @@ function Invoke-BBMethod
         }
         $Result = $webResponse.Content | ConvertFrom-Json2
 
-        
+
         If (($Result | Get-Member -MemberType NoteProperty).Name -contains "isLastPage")
         {
             Write-Output $Result.values

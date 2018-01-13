@@ -1,4 +1,4 @@
-Function Get-BBBranch {    
+Function Get-Branch {
     [CmdletBinding(DefaultParameterSetName="All")]
     Param (
         [Parameter(Mandatory)]
@@ -13,9 +13,9 @@ Function Get-BBBranch {
         [string]$Project
     )
 
-    ValidateBBSession
+    Validate-Session
 
-    $ProjectKeys = Get-BBProjectKey -Repo $Repo | Where { $_ -match $Project }
+    $ProjectKeys = Get-ProjectKey -Repo $Repo | Where { $_ -match $Project }
     If ($ExcludePersonalProjects)
     {
         $ProjectKeys = $ProjectKeys | Where { -not $_.Contains("~") }
@@ -29,7 +29,7 @@ Function Get-BBBranch {
         Write-Verbose "       Server: $($Global:BBSession.Server)"
 
         $Uri = "/projects/$ProjectKey/repos/$Repo/branches"
-        $Branches = Invoke-BBMethod -Uri $uri -Credential $Global:BBSession.Credential -Method GET | Where displayId -match $Branch
+        $Branches = Invoke-Method -Uri $uri -Credential $Global:BBSession.Credential -Method GET | Where displayId -match $Branch
 
         $Branches | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey
         $Branches

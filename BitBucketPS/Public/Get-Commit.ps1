@@ -1,4 +1,4 @@
-Function Get-BBCommits {    
+Function Get-Commit {
     [CmdletBinding(DefaultParameterSetName="All")]
     Param (
         [Parameter(Mandatory)]
@@ -11,9 +11,9 @@ Function Get-BBCommits {
         [string]$Project
     )
 
-    ValidateBBSession
-    
-    $ProjectKeys = Get-BBProjectKey -Repo $Repo | Where { $_ -match $Project }
+    Validate-Session
+
+    $ProjectKeys = Get-ProjectKey -Repo $Repo | Where { $_ -match $Project }
     If ($ExcludePersonalProjects)
     {
         $ProjectKeys = $ProjectKeys | Where { -not $_.Contains("~") }
@@ -27,7 +27,7 @@ Function Get-BBCommits {
         Write-Verbose "     Server: $($Global:BBSession.Server)"
 
         $Uri = "/projects/$ProjectKey/repos/$Repo/commits"
-        $CommitObj = Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
+        $CommitObj = Invoke-Method -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
         $CommitObj | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey
         $CommitObj | Select id,
                         displayID,
@@ -37,6 +37,6 @@ Function Get-BBCommits {
                         @{Name="Committer";Expression={ $_.committer.displayName }},
                         @{Name="CommitterTimeStamp";Expression={ (Get-Date "1/1/1970").AddMilliseconds($_.committerTimestamp) }},
                         Project,
-                        Message 
+                        Message
     }
 }

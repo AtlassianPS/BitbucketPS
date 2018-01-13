@@ -1,4 +1,4 @@
-# SEMI FUNCTIONAL STATE!!!! 
+# SEMI FUNCTIONAL STATE!!!!
 
 Import module with the PSM1 was having issues with PSD1
 
@@ -17,14 +17,14 @@ This module has a hard dependency on PowerShell 3.0.  I have no plans to release
 Before using BitbucketPS, you'll need to define your Bitbucket server URL.  You will only need to do this once:
 
 ```powershell
-Set-BBConfigServer "https://bitbucket.example.com"
+Set-ConfigServer "https://bitbucket.example.com"
 ```
 
 To use BitbucketPS:
 
 ```powershell
 Import-Module BitbucketPS
-New-BBSession -Credential (Get-Credential YourUserName)
+New-BitBucketSession -Credential (Get-Credential YourUserName)
 ```
 
 ## Contact
