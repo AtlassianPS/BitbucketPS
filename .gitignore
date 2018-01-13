@@ -1,7 +1,7 @@
 # Ignore config file
 config.xml
 BBconfig.xml
-exclude
+*exclude*
 
 #######
 # Excerpts from https://www.gitignore.io
