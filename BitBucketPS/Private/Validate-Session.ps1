@@ -1,4 +1,4 @@
-﻿Function Validate-Session
+Function Validate-Session
 {
     [CmdletBinding()]
     Param ()

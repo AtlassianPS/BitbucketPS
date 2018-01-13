@@ -1,5 +1,4 @@
-Function Set-ConfigServer
-{
+function Set-ConfigServer {
     <#
     .Synopsis
        Defines the configured URL for the BitBucket server
@@ -19,69 +18,80 @@ Function Set-ConfigServer
        Support for multiple configuration files is limited at this point in time, but enhancements are planned for a future update.
     #>
     [CmdletBinding()]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '')]
     param(
-        [Parameter(
-            Mandatory = $true,
-            Position = 0)]
+        [Parameter( Mandatory )]
         [ValidateNotNullOrEmpty()]
         [Alias('Uri')]
-        [String]$Server,
+        [Uri]
+        $Server,
 
-        [String]$ConfigFile
+        [String]
+        $ConfigFile
     )
 
-    # Using a default value for this parameter wouldn't handle all cases. We want to make sure
-    # that the user can pass a $null value to the ConfigFile parameter...but If it's null, we
-    # want to default to the script variable just as we would If the parameter was not
-    # provided at all.
-
-    If (-not ($ConfigFile))
-    {
-        # This file should be in $moduleRoot/Functions/Internal, so PSScriptRoot will be $moduleRoot/Functions
-        $ConfigFile = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'BBconfig.xml'
+    begin {
+        Write-Verbose "[$($MyInvocation.MyCommand.Name)] Function started"
     }
 
-    If (-not (Test-Path -Path $ConfigFile))
-    {
-        $xml = [XML] '<Config></Config>'
+    process {
+        Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] ParameterSetName: $($PsCmdlet.ParameterSetName)"
+        Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] PSBoundParameters: $($PSBoundParameters | Out-String)"
 
-    }
-    Else
-    {
-        $xml = New-Object -TypeName XML
-        $xml.Load($ConfigFile)
+        # Using a default value for this parameter wouldn't handle all cases. We want to make sure
+        # that the user can pass a $null value to the ConfigFile parameter...but if it's null, we
+        # want to default to the script variable just as we would if the parameter was not
+        # provided at all.
+
+        if (-not ($ConfigFile)) {
+            # This file should be in $moduleRoot/Functions/Internal, so PSScriptRoot will be $moduleRoot/Functions
+            $moduleFolder = Split-Path -Path $PSScriptRoot -Parent
+            $ConfigFile = Join-Path -Path $moduleFolder -ChildPath 'config.xml'
+        }
+
+        Write-Debug "[$($MyInvocation.MyCommand.Name)] Config file path: $ConfigFile"
+        if (-not (Test-Path -Path $ConfigFile)) {
+            Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] Creating new Config file"
+            $xml = [XML] '<Config></Config>'
+        }
+        else {
+            Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] Using existing Config file"
+            $xml = New-Object -TypeName XML
+            $xml.Load($ConfigFile)
+        }
+
+        $xmlConfig = $xml.DocumentElement
+        if ($xmlConfig.LocalName -ne 'Config') {
+            $errorItem = [System.Management.Automation.ErrorRecord]::new(
+                ([System.ArgumentException]"Invalid Document"),
+                'InvalidObject.InvalidDocument',
+                [System.Management.Automation.ErrorCategory]::InvalidData,
+                $_
+            )
+            $errorItem.ErrorDetails = "Unexpected document element [$($xmlConfig.LocalName)] in configuration file. You may need to delete the config file and recreate it using this function."
+            $PSCmdlet.ThrowTerminatingError($errorItem)
+        }
+
+        $fixedServer = $Server.AbsoluteUri.Trim('/')
+
+        if ($xmlConfig.Server) {
+            $xmlConfig.Server = $fixedServer
+        }
+        else {
+            $xmlServer = $xml.CreateElement('Server')
+            $xmlServer.InnerText = $fixedServer
+            [void] $xmlConfig.AppendChild($xmlServer)
+        }
+
+        try {
+            $xml.Save($ConfigFile)
+        }
+        catch {
+            throw $_
+        }
     }
 
-    $xmlConfig = $xml.DocumentElement
-    If ($xmlConfig.LocalName -ne 'Config')
-    {
-        Write-Error "Unexpected document element [$($xmlConfig.LocalName)] in configuration file. You may need to delete the config file and recreate it using this function." -ErrorAction Stop
-    }
-
-    # Check for trailing slash and strip it If necessary
-    $fixedServer = $Server.Trim()
-
-    If ($fixedServer.EndsWith('/') -or $fixedServer.EndsWith('\')) {
-        $fixedServer = $Server.Substring(0, $Server.Length - 1)
-    }
-
-    If ($xmlConfig.Server)
-    {
-        $xmlConfig.Server = $fixedServer
-    }
-    Else
-    {
-        $xmlServer = $xml.CreateElement('Server')
-        $xmlServer.InnerText = $fixedServer
-        [void] $xmlConfig.AppendChild($xmlServer)
-    }
-
-    Try {
-        $xml.Save($ConfigFile)
-    }
-    Catch {
-        Write-Error "Unable to save $ConfigFile because ""$_""" -ErrorAction Stop
+    end {
+        Write-Verbose "[$($MyInvocation.MyCommand.Name)] Complete"
     }
 }
-
-
