@@ -56,7 +56,7 @@ function Invoke-BBMethod
         Catch {
             Write-Error "Unable to process query because ""$_""" -ErrorAction Stop
         }
-        $Result = $webResponse.Content | ConvertFrom-Json
+        $Result = $webResponse.Content | ConvertFrom-Json2
 
         
         If (($Result | Get-Member -MemberType NoteProperty).Name -contains "isLastPage")
