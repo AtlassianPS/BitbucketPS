@@ -11,5 +11,5 @@ Function Get-BBProjectKey {
     Write-Verbose "   RepoName: $Repo"
     Write-Verbose "     Server: $($Global:BBSession.Server)"
 
-    Get-BBRepositories | Where-Object slug -match $Repo | Select -ExpandProperty Project | Select -ExpandProperty Key
+    Get-BBRepositories | Where-Object slug -match $Repo | Select -ExpandProperty Project
 }

@@ -26,9 +26,17 @@ Function Get-BBCommits {
         Write-Verbose " ProjectKey: $ProjectKey"
         Write-Verbose "     Server: $($Global:BBSession.Server)"
 
-        $Uri = "$($Global:BBSession.Server)/rest/api/1.0/projects/$ProjectKey/repos/$Repo/commits"
+        $Uri = "/projects/$ProjectKey/repos/$Repo/commits"
         $CommitObj = Invoke-BBMethod -Uri $Uri -Credential $Global:BBSession.Credential -Method GET
         $CommitObj | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey
-        Write-Output $CommitObj
+        $CommitObj | Select id,
+                        displayID,
+                        @{Name="Author";Expression={ $_.author.displayName }},
+                        @{Name="AuthorTimeStamp";Expression={ (Get-Date "1/1/1970").AddMilliseconds($_.authorTimestamp) }},
+                        @{Name="AuthorEmail";Expression={ $_.author.emailAddress }},
+                        @{Name="Committer";Expression={ $_.committer.displayName }},
+                        @{Name="CommitterTimeStamp";Expression={ (Get-Date "1/1/1970").AddMilliseconds($_.committerTimestamp) }},
+                        Project,
+                        Message 
     }
 }

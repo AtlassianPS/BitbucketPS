@@ -26,6 +26,7 @@ function Invoke-BBMethod
     $Token = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("$($Credential.UserName):$($Credential.GetNetworkCredential().Password)"))
     $Headers.Add('Authorization', "Basic $token")
 
+    $Uri = "$($BBSession.URI)$Uri"
     $iwrSplat = @{
         Uri             = $Uri
         Headers         = $Headers

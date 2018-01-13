@@ -28,10 +28,10 @@ Function Get-BBBranch {
         Write-Verbose "   ProjectKey: $ProjectKey"
         Write-Verbose "       Server: $($Global:BBSession.Server)"
 
-        $Uri = "$($Global:BBSession.Server)/rest/api/1.0/projects/$ProjectKey/repos/$Repo/branches"
+        $Uri = "/projects/$ProjectKey/repos/$Repo/branches"
         $Branches = Invoke-BBMethod -Uri $uri -Credential $Global:BBSession.Credential -Method GET | Where displayId -match $Branch
 
         $Branches | Add-Member -MemberType NoteProperty -Name Project -Value $ProjectKey
-        Write-Output $Branches
+        $Branches
     }
 }

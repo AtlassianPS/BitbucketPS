@@ -47,8 +47,8 @@
     Try {
         $User = Invoke-BBMethod -URI "$Server/rest/api/latest/users/$($Credential.UserName)" -Method Get -Credential $Credential
         $Global:BBSession = [PSCustomObject]@{
-            Credential = $Credential
-            Server     = $Server
+            Credential   = $Credential
+            URI          = "$Server/rest/api/latest"
         }
         Write-Verbose "Successfully connected to BitBucket at $Server"
     }
