@@ -2,9 +2,9 @@
 
 Import module with the PSM1 was having issues with PSD1
 
-# BitBucketPS
+# BitbucketPS
 
-BitBucketPS is a Windows PowerShell module to interact with [Atlassian bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
+BitbucketPS is a Windows PowerShell module to interact with [Atlassian Bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
 
 
 ## Requirements
@@ -14,16 +14,16 @@ This module has a hard dependency on PowerShell 3.0.  I have no plans to release
 
 ## Getting Started
 
-Before using BitBucketPS, you'll need to define your bitbucket server URL.  You will only need to do this once:
+Before using BitbucketPS, you'll need to define your Bitbucket server URL.  You will only need to do this once:
 
 ```powershell
 Set-BBConfigServer "https://bitbucket.example.com"
 ```
 
-To use BitBucketPS:
+To use BitbucketPS:
 
 ```powershell
-Import-Module BitBucketPS
+Import-Module BitbucketPS
 New-BBSession -Credential (Get-Credential YourUserName)
 ```
 
@@ -31,4 +31,4 @@ New-BBSession -Credential (Get-Credential YourUserName)
 
 Feel free to comment on this project here on GitHub using the issues or discussion pages.  You can also check out [my blog](http://beaudry.io) or catch me on [reddit](https://www.reddit.com/u/crossbeau).
 
-*Note:* As with all community PowerShell modules and code, you use BitBucketPS at your own risk.  I am not responsible if your bitbucket instance causes a fire in your datacenter (literal or otherwise).
+*Note:* As with all community PowerShell modules and code, you use BitbucketPS at your own risk.  I am not responsible if your bitbucket instance causes a fire in your datacenter (literal or otherwise).
