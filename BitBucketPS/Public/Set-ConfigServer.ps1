@@ -1,15 +1,19 @@
 function Set-ConfigServer {
     <#
-    .Synopsis
-       Defines the configured URL for the BitBucket server
+    .SYNOPSIS
+       Defines the configured URL for the Bitbucket server
     .DESCRIPTION
-       This function defines the configured URL for the BitBucket server that PSBitBucket should manipulate. By default, this is stored in a config.xml file at the module's root path.
+       This function defines the configured URL for the Bitbucket server that BitbucketPS should manipulate. By default, this is stored in a config.xml file at the module's root path.
+    .PARAMETER Server
+        Full URL to your Bitbucket server
+    .PARAMETER ConfigFile
+        Alternative path to your configuration file.  You must include the path and file name.
     .EXAMPLE
-       Set-BitBucketConfigServer 'https://BitBucket.example.com:8080'
-       This example defines the server URL of the BitBucket server configured in the PSBitBucket config file.
+       Set-ConfigServer 'https://Bitbucket.example.com:8080'
+       This example defines the server URL of the Bitbucket server configured in the BitbucketPS config file.
     .EXAMPLE
-       Set-BitBucketConfigServer -Server 'https://BitBucket.example.com:8080' -ConfigFile C:\BitBucketconfig.xml
-       This example defines the server URL of the BitBucket server configured at C:\BitBucketconfig.xml.
+       Set-ConfigServer -Server 'https://Bitbucket.example.com:8080' -ConfigFile C:\Bitbucketconfig.xml
+       This example defines the server URL of the Bitbucket server configured at C:\Bitbucketconfig.xml.
     .INPUTS
        This function does not accept pipeline input.
     .OUTPUTS
@@ -22,19 +26,16 @@ function Set-ConfigServer {
     param(
         [Parameter( Mandatory )]
         [ValidateNotNullOrEmpty()]
-        [Alias('Uri')]
-        [Uri]
-        $Server,
+        [Uri]$Server,
 
-        [String]
-        $ConfigFile
+        [String]$ConfigFile
     )
 
-    begin {
+    Begin {
         Write-Verbose "[$($MyInvocation.MyCommand.Name)] Function started"
     }
 
-    process {
+    Process {
         Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] ParameterSetName: $($PsCmdlet.ParameterSetName)"
         Write-DebugMessage "[$($MyInvocation.MyCommand.Name)] PSBoundParameters: $($PSBoundParameters | Out-String)"
 
