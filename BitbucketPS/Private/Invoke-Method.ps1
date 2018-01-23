@@ -1,7 +1,20 @@
 function Invoke-Method {
     <#
     .SYNOPSIS
-    Extracted invokation of the REST method to own function.
+        Extracted invokation of the REST method to own function.
+
+    .PARAMETER IncludeTotalCount
+        NOTE: Not yet implemented.
+        Causes an extra output of the total count at the beginning.
+        Note this is actually a uInt64, but with a custom string representation.
+
+    .PARAMETER Skip
+        Controls how many things will be skipped before starting output.
+        Defaults to 0.
+
+    .PARAMETER First
+        NOTE: Not yet implemented.
+        Indicates how many items to return.
     #>
     [CmdletBinding( SupportsPaging )]
     # [OutputType(
@@ -54,6 +67,11 @@ function Invoke-Method {
         [PSCredential]
         $Credential,
 
+        # Parameter that defines the original caller of this function
+        # This is used so that errors can be thrown on the level the user called it
+        # instead of showing cryptic lines of code of the guts of functions
+        #
+        # Please do not use this parameter unless you know what you are doing.
         $Caller = $PSCmdlet
     )
 

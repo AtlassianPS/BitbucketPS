@@ -60,4 +60,4 @@ Hopefully this is obvious, but:
   [Source Code]: <https://github.com/AtlassianPS/BitBucketPS>
   [Latest Release]: <https://github.com/AtlassianPS/BitBucketPS/releases/latest>
   [Submit an Issue]: <https://github.com/AtlassianPS/BitBucketPS/issues/new>
-  [MIT license]: <https://github.com/brianbunke/BitBucketPS/blob/master/LICENSE>
+  [MIT license]: <https://github.com/AtlassianPS/BitBucketPS/blob/master/LICENSE>

@@ -1,22 +1,33 @@
 #Requires -Modules PSScriptAnalyzer
 
 $projectRoot = "$PSScriptRoot/.."
-$moduleRoot = "$projectRoot/BitBucketPS"
+$moduleRoot = "$projectRoot/BitbucketPS"
 
-$manifestFile = "$moduleRoot\BitBucketPS.psd1"
+$manifestFile = "$moduleRoot\BitbucketPS.psd1"
 $changelogFile = "$projectRoot\CHANGELOG.md"
 $appveyorFile = "$projectRoot\appveyor.yml"
 $publicFunctions = "$moduleRoot\Public"
 $privateFunctions = "$moduleRoot\Private"
 
-Describe "BitBucketPS" {
+Describe "BitbucketPS" {
     Context "All required tests are present" {
         # We want to make sure that every .ps1 file in the Functions directory that isn't a Pester test has an associated Pester test.
         # This helps keep me honest and makes sure I'm testing my code appropriately.
         It "Includes a test for each PowerShell function in the module" {
-            Get-ChildItem -Path $publicFunctions -Filter "*.ps1" -Recurse | Where-Object -FilterScript {$_.Name -notlike '*.Tests.ps1'} | % {
-                $expectedTestFile = Join-Path $projectRoot "Tests\$($_.BaseName).Tests.ps1"
+            Get-ChildItem -Path $publicFunctions -Filter "*.ps1" | Foreach-Object {
+                $expectedTestFile = Join-Path $projectRoot "Tests/$($_.BaseName).Tests.ps1"
                 $expectedTestFile | Should Exist
+            }
+
+            $privateFunctionMissingTests = @()
+            Get-ChildItem -Path $privateFunctions -Filter "*.ps1" | Foreach-Object {
+                $expectedTestFile = Join-Path $projectRoot "Tests/$($_.BaseName).Tests.ps1"
+                if (-not (Test-Path $expectedTestFile)) {
+                    $privateFunctionMissingTests += $_.BaseName
+                }
+            }
+            if ($privateFunctionMissingTests) {
+                Write-Warning ("It is recommended to have tests for the following private function:`n`t{0}" -f ($privateFunctionMissingTests -join "`n`t"))
             }
         }
     }
@@ -26,7 +37,7 @@ Describe "BitBucketPS" {
         # These tests are...erm, borrowed...from the module tests from the Pester module.
         # I think they are excellent for sanity checking, and all credit for the following
         # tests goes to Dave Wyatt, the genius behind Pester.  I've just adapted them
-        # slightly to match BitBucketPS.
+        # slightly to match BitbucketPS.
 
         $script:manifest = $null
 
@@ -62,7 +73,7 @@ Describe "BitBucketPS" {
         $script:manifest = Invoke-Expression (Get-Content $script:manifestFile -Raw)
 
         It "Manifest file includes the correct root module" {
-            $script:manifest.RootModule | Should Be 'BitBucketPS.psm1'
+            $script:manifest.RootModule | Should Be 'BitbucketPS.psm1'
         }
 
         It "Manifest file includes the correct guid" {
@@ -168,7 +179,7 @@ Describe "BitBucketPS" {
     }
 
     Context 'PSScriptAnalyzer Rules' {
-        $analysis = Invoke-ScriptAnalyzer -Path "$moduleRoot" -Recurse -Settings "$projectRoot\PSScriptAnalyzerSettings.psd1"
+        $analysis = Invoke-ScriptAnalyzer -Path "$moduleRoot" -Recurse -Settings "$projectRoot/PSScriptAnalyzerSettings.psd1"
         $scriptAnalyzerRules = Get-ScriptAnalyzerRule
 
         forEach ($rule in $scriptAnalyzerRules) {

@@ -96,14 +96,7 @@ function Get-ParametersDefaultFirst {
     END { }
 }
 
-
 $ModuleBase = "$PSScriptRoot\..\BitBucketPS"
-
-# For tests in .\Tests subdirectory
-if ((Split-Path $ModuleBase -Leaf) -eq 'Tests') {
-    $ModuleBase = Split-Path $ModuleBase -Parent
-}
-
 
 # Handles modules in version directories
 $leaf = Split-Path $ModuleBase -Leaf
@@ -116,7 +109,7 @@ else {
     $ModuleName = $leaf
 }
 
-foreach ($prefix in @("", "BB")) {
+foreach ($prefix in @("", "Bb")) {
     # Removes all versions of the module from the session before importing
     Get-Module $ModuleName | Remove-Module
 

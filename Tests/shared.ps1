@@ -1,7 +1,6 @@
 #Requires -Modules Pester
 
 # Dot source this script in any Pester test script that requires the module to be imported.
-
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '', Scope = '*', Target = 'ShowMockData')]
 $script:ShowMockData = $true
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '', Scope = '*', Target = 'ShowDebugText')]

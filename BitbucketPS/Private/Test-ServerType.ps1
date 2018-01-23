@@ -11,6 +11,11 @@ Function Test-ServerType {
         [Hashtable]
         $Headers,
 
+        # Parameter that defines the original caller of this function
+        # This is used so that errors can be thrown on the level the user called it
+        # instead of showing cryptic lines of code of the guts of functions
+        #
+        # Please do not use this parameter unless you know what you are doing.
         $Caller = $PSCmdlet
     )
 

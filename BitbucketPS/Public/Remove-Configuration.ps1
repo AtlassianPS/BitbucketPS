@@ -22,9 +22,7 @@ function Remove-Configuration {
         [Parameter( Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName )]
         [Alias('Name', 'Alias')]
         [String]
-        $ServerName,
-
-        $Caller = $PSCmdlet
+        $ServerName
     )
 
     begin {

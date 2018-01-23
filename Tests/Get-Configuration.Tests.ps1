@@ -1,24 +1,27 @@
-Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -ErrorAction Stop
+Describe "Get-Configuration" {
 
-InModuleScope BitbucketPS {
+    Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
-    . $PSScriptRoot\Shared.ps1
+    InModuleScope BitbucketPS {
 
-    Describe "Get-Configuration" {
+        . $PSScriptRoot\Shared.ps1
 
         #region Mocking
+        Mock Set-BitbucketConfiguration {
+            $script:Configuration.Server = @()
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name = "Test1"
+                Uri  = "https://google.com"
+            }
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name = "Test2"
+                Uri  = "http://google.com"
+            }
+        }
         #endregion Mocking
 
         #region Arrange
-        $script:Configuration.Server = @()
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test1"
-            Uri  = "https://google.com"
-        }
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test2"
-            Uri  = "http://google.com"
-        }
+        Set-BitbucketConfiguration -Uri "foo"
         #endregion Arrange
 
         Context "Sanity checking" {

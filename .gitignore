@@ -1,9 +1,3 @@
-# Ignore configuration files
-*.ini
-*.conf
-*.config
-config.xml
-
 # Ignore all files beginning with a dot (.)
 .*
 # except for git files

@@ -30,7 +30,7 @@ function Get-Configuration {
         # Address of the stored server.
         # This all wildchards.
         [Parameter( Mandatory, ParameterSetName = 'ServerDataByUri' )]
-        [Alias('Url', 'Address', 'Server')]
+        [Alias('Url', 'Address')]
         [Uri]
         $Uri,
 
@@ -66,4 +66,12 @@ function Get-Configuration {
     end {
         Write-Verbose "[$($MyInvocation.MyCommand.Name)] Function ended"
     }
+}
+
+if (Get-Command Register-ArgumentCompleter -ErrorAction Ignore) {
+    Register-ArgumentCompleter `
+        -CommandName (Get-Command "Get-*Configuration" -Module "BitbucketPS") `
+        -Parameter "ServerName" `
+        -ScriptBlock $function:ServerNameCompletion `
+        -Description 'This argument completer handles the -ServerName parameter of the Get-Configuration command.'
 }

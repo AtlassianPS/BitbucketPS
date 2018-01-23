@@ -18,7 +18,6 @@ function Export-Configuration {
 
     .LINK
         Set-Configuration
-    .LINK
         New-Session
     #>
     [CmdletBinding()]
@@ -26,6 +25,8 @@ function Export-Configuration {
 
     begin {
         Write-Verbose "[$($MyInvocation.MyCommand.Name)] Function started"
+
+        Import-MqcnAlias -Alias "ExportConfiguration" -Command "Configuration\Export-Configuration"
     }
 
     process {
@@ -35,7 +36,7 @@ function Export-Configuration {
         $export = $script:Configuration
         $export.Server = $export.Server | Select-Object -Exclude Session
 
-        Configuration\Export-Configuration -InputObject $export
+        ExportConfiguration -InputObject $export
     }
 
     end {
