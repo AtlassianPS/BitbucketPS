@@ -1,0 +1,86 @@
+############################################################
+#
+# See http://www.appveyor.com/docs/appveyor-yml for many more options
+#
+# Credit for a lot of this file goes to RamblingCookieMonster:
+# https://github.com/RamblingCookieMonster/PSSQLite/blob/master/appveyor.yml
+#
+############################################################
+
+
+environment:
+    # To encrypt a value in AppVeyor, go to the Account menu and choose "Encrypt data"
+    PSGalleryAPIKey:
+        secure: Kffca6TRgAQESKLBk5ghCDMFbMmH2+8DzLyu1M6a7EBRJCwfxaiJeaIXs9SmQz0i
+    access_token:
+        secure: PX1R0Ds6r3TTm+wxVbx8MRAgjCRV/juO3cYSEz1MedB/OXvZ3YkqpQGE+X47bcFT
+    fast_finish: true
+    matrix:
+        # - image: Visual Studio 2013
+        - image: Visual Studio 2017
+
+version: 0.1.{build}
+
+# Don't rebuild when I tag a release on GitHub
+skip_tags: true
+
+# Ignore testing a commit if only the readme changed
+# Or if I include "skip-tests" in the commit message
+skip_commits:
+  message: /skip\-tests/
+  files:
+    - .github/
+    - .vscode/
+    - README.md
+    - .gitattributes
+    - .gitignore
+    - .env*
+
+# PRs, by definition, don't change anything and therefore should not increment the version
+# To be fair, this is not important, and is really just AppVeyor enabling my pedantry
+pull_requests:
+  do_not_increment_build_number: true
+
+init:
+    - git config --global credential.helper store
+    - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+    - git config --global user.email "support@atlassianps.org"
+    - git config --global user.name "AtlassianPS automation"
+
+install:
+    - cmd: git config --global core.autocrlf true
+    - cmd: npm install -g markdown-spellcheck
+    - ps: |
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+        Install-Module InvokeBuild -Scope CurrentUser -Force
+        $env:releasePath = "$($pwd.Path)\Release"
+
+before_build:
+    - ps: Invoke-Build -Task ShowDebug
+
+build_script:
+    - ps: Invoke-Build -Task Build
+
+# after_build:
+    # - cmd: mdspell %releasePath%\**/*.md --ignore-numbers --ignore-acronyms --report
+
+test_script:
+    - ps: Invoke-Build -Task Test
+
+before_deploy:
+    - ps: Invoke-Build -Task Deploy
+
+deploy:
+    provider: GitHub
+    release: v$(appveyor_build_version)
+    description: ''
+    auth_token:
+        secure: PX1R0Ds6r3TTm+wxVbx8MRAgjCRV/juO3cYSEz1MedB/OXvZ3YkqpQGE+X47bcFT
+    draft: false
+    prerelease: false
+    on:
+        branch: master                 # release from master branch only
+        appveyor_repo_tag: false        # deploy on tag push only
+
+# on_failure:
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
