@@ -1,4 +1,5 @@
 [CmdletBinding()]
+[System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingWriteHost', '')]
 param()
 
 $DebugPreference = "SilentlyContinue"
@@ -30,7 +31,6 @@ $REPO_COMMIT_AUTHOR = if ($env:APPVEYOR_REPO_COMMIT_AUTHOR) {$env:APPVEYOR_REPO_
 
 # region debug information
 task ShowDebug {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingWriteHost', '')]
     Write-Host -Foreground "Gray"
     switch ($true) {
         $env:APPVEYOR_JOB_ID { $CI = "AppVeyor"; continue }
