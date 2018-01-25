@@ -16,7 +16,7 @@ environment:
         secure: PX1R0Ds6r3TTm+wxVbx8MRAgjCRV/juO3cYSEz1MedB/OXvZ3YkqpQGE+X47bcFT
     fast_finish: true
     matrix:
-        # - image: WMF 4
+        - image: WMF 4
         - image: Visual Studio 2017
         - image: Visual Studio 2017
           PowershellVersion: "6.0.0"
@@ -62,8 +62,8 @@ install:
 before_build:
     - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task ShowDebug") else (powershell -Command "Invoke-Build -Task ShowDebug")
 
-build_script:
-    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task Build") else (powershell -Command "Invoke-Build -Task Build")
+# build_script:
+#     - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task Build") else (powershell -Command "Invoke-Build -Task Build")
 
 # after_build:
     # - cmd: mdspell %releasePath%\**/*.md --ignore-numbers --ignore-acronyms --report
@@ -86,5 +86,5 @@ deploy:
         branch: master                 # release from master branch only
         appveyor_repo_tag: false        # deploy on tag push only
 
-on_failure:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_failure:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

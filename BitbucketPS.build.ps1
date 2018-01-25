@@ -18,10 +18,19 @@ Import-Module BuildHelpers
 Set-StrictMode -Version Latest
 
 switch ($true) {
-    {$env:APPVEYOR_JOB_ID} { $CI = "AppVeyor"; continue }
-    {$env:TRAVIS} { $CI = "Travis"; continue }
+    {$env:APPVEYOR_JOB_ID} {
+        $CI = "AppVeyor"
+        $OS = "Windows"
+        continue
+    }
+    {$env:TRAVIS} {
+        $CI = "Travis"
+        $OS = $env:TRAVIS_OS_NAME
+        continue
+    }
     Default {
         $CI = "local"
+        $OS = "Windows"
         $branch = git branch 2>&1 | select-string -Pattern "^\*\s(.+)$" | Foreach-Object { $_.Matches.Groups[1].Value}
         $commit = git log 2>&1 | select-string -Pattern "^commit ([0-9a-f]{7}) \(HEAD ->.*$branch.*$" | Foreach-Object { $_.Matches.Groups[1].Value}
         continue
@@ -48,10 +57,6 @@ task ShowDebug {
     Write-Host ('  - Author:                 {0}' -f $REPO_COMMIT_AUTHOR) -Foreground "Gray"
 
     Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
-    switch ($true) {
-        $env:TRAVIS { $OS = $env:TRAVIS_OS_NAME; continue }
-        Default { $OS = "Windows"; continue }
-    }
     Write-Host ('OS:                         {0}' -f $OS) -Foreground "Gray"
     Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
 
