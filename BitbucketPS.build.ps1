@@ -11,22 +11,20 @@ if ($PSBoundParameters.ContainsKey('Verbose')) {
 $releasePath = "$BuildRoot\Release"
 $env:PSModulePath = "$($env:PSModulePath);$releasePath"
 
-Install-Module PSGit -Scope CurrentUser -AllowClobber
-# Install-Module BuildHelpers -Scope CurrentUser -AllowClobber
-# Import-Module BuildHelpers
+Install-Module BuildHelpers -Scope CurrentUser -AllowClobber
+Import-Module BuildHelpers
 
 # Ensure Invoke-Build works in the most strict mode.
 Set-StrictMode -Version Latest
 
-if (Import-Module PSGit -Force -PassThru) {
-    $gitInfo = Get-GitInfo
-}
+$branch = git branch 2>&1 | select-string -Pattern "^\*\s(.+)$" | Foreach-Object { $_.Matches.Groups[1].Value}
+$commit = git log 2>&1 | select-string -Pattern "^commit ([0-9a-f]{7}) \(HEAD ->.*$branch.*$" | Foreach-Object { $_.Matches.Groups[1].Value}
 
-$PROJECT_NAME = if ($env:APPVEYOR_PROJECT_NAME) {$env:APPVEYOR_PROJECT_NAME} elseif ($env:TRAVIS_REPO_SLUG) {$env:TRAVIS_REPO_SLUG} elseif ($gitInfo) {Split-Path $gitinfo.Remote -Leaf} else {Split-Path $BuildRoot -Leaf}
+$PROJECT_NAME = if ($env:APPVEYOR_PROJECT_NAME) {$env:APPVEYOR_PROJECT_NAME} elseif ($env:TRAVIS_REPO_SLUG) {$env:TRAVIS_REPO_SLUG} else {Split-Path $BuildRoot -Leaf}
 $BUILD_FOLDER = if ($env:APPVEYOR_BUILD_FOLDER) {$env:APPVEYOR_BUILD_FOLDER} elseif ($env:TRAVIS_BUILD_DIR) {$env:TRAVIS_BUILD_DIR} else {$BuildRoot}
-$REPO_NAME    = if ($env:APPVEYOR_REPO_NAME) {$env:APPVEYOR_REPO_NAME} elseif ($env:TRAVIS_REPO_SLUG) {$env:TRAVIS_REPO_SLUG} elseif ($gitInfo) {Split-Path $gitinfo.Remote -Leaf} else {Split-Path $BuildRoot -Leaf}
-$REPO_BRANCH = if ($env:APPVEYOR_REPO_BRANCH) {$env:APPVEYOR_REPO_BRANCH} elseif ($env:TRAVIS_BRANCH) {$env:TRAVIS_BRANCH} elseif ($gitInfo) {$gitinfo.Branch} else {''}
-$REPO_COMMIT = if ($env:APPVEYOR_REPO_COMMIT) {$env:APPVEYOR_REPO_COMMIT} elseif ($env:TRAVIS_COMMIT) {$env:TRAVIS_COMMIT} elseif ($gitInfo) {$gitInfo.Tip} else {''}
+$REPO_NAME    = if ($env:APPVEYOR_REPO_NAME) {$env:APPVEYOR_REPO_NAME} elseif ($env:TRAVIS_REPO_SLUG) {$env:TRAVIS_REPO_SLUG} else {Split-Path $BuildRoot -Leaf}
+$REPO_BRANCH = if ($env:APPVEYOR_REPO_BRANCH) {$env:APPVEYOR_REPO_BRANCH} elseif ($env:TRAVIS_BRANCH) {$env:TRAVIS_BRANCH} elseif ($branch) {$branch} else {''}
+$REPO_COMMIT = if ($env:APPVEYOR_REPO_COMMIT) {$env:APPVEYOR_REPO_COMMIT} elseif ($env:TRAVIS_COMMIT) {$env:TRAVIS_COMMIT} elseif ($commit) {$commit} else {''}
 $REPO_COMMIT_AUTHOR = if ($env:APPVEYOR_REPO_COMMIT_AUTHOR) {$env:APPVEYOR_REPO_COMMIT_AUTHOR} elseif ($env:TRAVIS_COMMIT) {''} else {''}
 
 # region debug information
