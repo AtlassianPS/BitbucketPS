@@ -16,10 +16,12 @@ environment:
         secure: PX1R0Ds6r3TTm+wxVbx8MRAgjCRV/juO3cYSEz1MedB/OXvZ3YkqpQGE+X47bcFT
     fast_finish: true
     matrix:
-        # - image: Visual Studio 2013
+        - image: WMF 4
         - image: Visual Studio 2017
+        - image: Visual Studio 2017
+          PowershellVersion: "6.0.0"
 
-version: 0.1.{build}
+version: 0.2.{build}
 
 # Don't rebuild when I tag a release on GitHub
 skip_tags: true
@@ -42,6 +44,7 @@ pull_requests:
   do_not_increment_build_number: true
 
 init:
+    - if not defined PowershellVersion (set PowershellVersion=5)
     - git config --global credential.helper store
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
     - git config --global user.email "support@atlassianps.org"
@@ -50,25 +53,25 @@ init:
 install:
     - cmd: git config --global core.autocrlf true
     - cmd: npm install -g markdown-spellcheck
-    - ps: |
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
-        Install-Module InvokeBuild -Scope CurrentUser -Force
-        $env:releasePath = "$($pwd.Path)\Release"
+    - cmd: 'echo Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null > temp.ps1'
+    - cmd: 'echo Install-Module InvokeBuild -Scope CurrentUser -Force > temp.ps1'
+    - cmd: 'echo $env:releasePath = "$($pwd.Path)\Release" > temp.ps1'
+    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -File .\temp.ps1) else (powershell -File .\temp.ps1)
 
 before_build:
-    - ps: Invoke-Build -Task ShowDebug
+    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task ShowDebug") else (powershell -Command "Invoke-Build -Task ShowDebug")
 
 build_script:
-    - ps: Invoke-Build -Task Build
+    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task Build") else (powershell -Command "Invoke-Build -Task Build")
 
 # after_build:
     # - cmd: mdspell %releasePath%\**/*.md --ignore-numbers --ignore-acronyms --report
 
 test_script:
-    - ps: Invoke-Build -Task Test
+    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task Test") else (powershell -Command "Invoke-Build -Task Test")
 
 before_deploy:
-    - ps: Invoke-Build -Task Deploy
+    - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -Command "Invoke-Build -Task Deploy") else (powershell -Command "Invoke-Build -Task Deploy")
 
 deploy:
     provider: GitHub
