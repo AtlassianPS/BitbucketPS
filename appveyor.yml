@@ -21,7 +21,7 @@ environment:
         - image: Visual Studio 2017
           PowershellVersion: "6.0.0"
 
-version: 0.2.{build}
+version: 0.0.{build}
 
 # Don't rebuild when I tag a release on GitHub
 skip_tags: true
