@@ -8,6 +8,7 @@ Describe "Remove-Configuration" {
 
         #region Mocking
         Mock Get-BitbucketConfiguration {
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name', 'Uri'
             MockedDebug ($script:Configuration.Server | Out-String)
             $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
         }

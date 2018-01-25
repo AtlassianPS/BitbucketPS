@@ -8,6 +8,7 @@ Describe "Set-Configuration" {
 
         #region Mocking
         Mock Test-ServerType {
+            ShowMockInfo 'Test-ServerType' 'Uri'
             if ($Uri -like "*fail*") {
                 throw "Not Bitbucket Server"
             }
@@ -20,6 +21,7 @@ Describe "Set-Configuration" {
         }
 
         Mock Get-BitbucketConfiguration {
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name','Uri'
             MockedDebug ($script:Configuration.Server | Out-String)
             $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
         }

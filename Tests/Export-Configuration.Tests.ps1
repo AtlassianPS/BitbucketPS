@@ -11,10 +11,12 @@ Describe "Export-Configuration" {
 
         function ExportConfiguration {}
         Mock ExportConfiguration {
+            ShowMockInfo 'ExportConfiguration' 'InputObject'
             $InputObject
         }
 
         Mock Get-BitbucketConfiguration {
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name','Uri'
             MockedDebug ($script:Configuration.Server | Out-String)
             $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
         }
