@@ -10,7 +10,7 @@ if ($PSBoundParameters.ContainsKey('Verbose')) {
 $releasePath = "$BuildRoot\Release"
 $env:PSModulePath = "$($env:PSModulePath);$releasePath"
 
-"PSGit" | Foreach-Object {if ($_ -notin (Get-Module -ListAvailable)) {Install-Module PSGit -Scope CurrentUser}}
+"PSGit" | Foreach-Object {if ($_ -notin (Get-Module -ListAvailable)) {Install-Module PSGit -Scope CurrentUser -AllowClobber}}
 Install-Module BuildHelpers -Scope CurrentUser
 Import-Module BuildHelpers
 
@@ -32,10 +32,11 @@ $REPO_COMMIT_AUTHOR = if ($env:APPVEYOR_REPO_COMMIT_AUTHOR) {$env:APPVEYOR_REPO_
 task ShowDebug {
     Write-Build Gray
     switch ($true) {
-        $env:APPVEYOR_JOB_ID { Write-Build Gray "Using AppVeyor"; continue }
-        $env:TRAVIS { Write-Build Gray "Using Travis-CI"; continue }
-        Default { Write-Build Gray "Using local build"; continue }
+        $env:APPVEYOR_JOB_ID { $CI = "AppVeyor"; continue }
+        $env:TRAVIS { $CI = "Travis"; continue }
+        Default { $CI = "local"; continue }
     }
+    Write-Build Gray $CI
     Write-Build Gray
     Write-Build Gray ('Project name:               {0}' -f $PROJECT_NAME)
     Write-Build Gray ('Project root:               {0}' -f $BUILD_FOLDER)
@@ -221,6 +222,22 @@ task ConvertMarkdown -Partial @ConvertMarkdown InstallPandoc, {process {
 # endregion
 
 # region publish
+# Do not deploy if this is a pull request (because it hasn't been approved yet)
+# Do not deploy if the commit contains the string "skip-deploy"
+# Meant for major/minor version publishes with a .0 build/patch version (like 2.1.0)
+$shouldDeploy = `
+    # only deploy from AppVeyor
+    $CI -eq "AppVeyor" -and
+    # only deploy from last Job
+
+    # Travis must have passed as well
+
+    # only deploy master branch
+    $env:APPVEYOR_REPO_BRANCH -eq 'master' -and
+    # it cannot be a PR
+    (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)) -and
+    # it cannot have a commit message that contains "skip-deploy"
+    $env:APPVEYOR_REPO_COMMIT_MESSAGE -notlike '*skip-deploy*'
 task Deploy -If (
     # Only deploy if the master branch changes
     $env:APPVEYOR_REPO_BRANCH -eq 'master' -and
