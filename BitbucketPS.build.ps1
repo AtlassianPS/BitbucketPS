@@ -11,7 +11,7 @@ $releasePath = "$BuildRoot\Release"
 $env:PSModulePath = "$($env:PSModulePath);$releasePath"
 
 "PSGit" | Foreach-Object {if ($_ -notin (Get-Module -ListAvailable)) {Install-Module PSGit -Scope CurrentUser -AllowClobber}}
-Install-Module BuildHelpers -Scope CurrentUser
+Install-Module BuildHelpers -Scope CurrentUser -AllowClobber
 Import-Module BuildHelpers
 
 # Ensure Invoke-Build works in the most strict mode.
