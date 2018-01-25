@@ -252,7 +252,30 @@ function allJobsFinished() {
     if (!$success) {throw "Test jobs were not finished in $env:TimeOutMins minutes"}
 }
 function allCIsFinished() {
+    #region Travis
+    # install https://github.com/travis-ci/travis.rb#installation
+    # get API token according https://developer.travis-ci.com/authentication
 
+    # $env:TRAVIS_API_TOKEN = "<replace>" # must be secure variable set in Environment tab or YAML section
+    # $env:TimeOutMins = <replace> # how long to wait for Travis build to complete (set in Environment tab or YAML section)
+
+    # $headers = @{
+    #   "Authorization" = "token $env:TRAVIS_API_TOKEN"
+    #   "Travis-API-Version" = "3"
+    # }
+
+    # [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
+    # [bool]$success = $false
+
+    # while(!$success -and ([datetime]::Now) -lt $stop) {
+    #     $builds = Invoke-RestMethod -Uri "https://api.travis-ci.org/builds?limit=10" -Headers $headers  -Method Get
+    #     $currentBuild = $builds.builds | ? {$_.commit.sha -eq $env:APPVEYOR_REPO_COMMIT}
+    #     $success = $currentBuild.state -eq "passed"
+    #     if (!$success) {Start-sleep 5}
+    # }
+    # if (!$currentBuild) {throw "Could not get information about Travis build with sha $env:APPVEYOR_REPO_COMMIT"}
+    # if (!$success) {throw "Travis build did not finished in $env:TimeOutMins minutes"}
+    #endregion Travis
 }
 # Do not deploy if this is a pull request (because it hasn't been approved yet)
 # Do not deploy if the commit contains the string "skip-deploy"
@@ -261,24 +284,16 @@ $shouldDeploy = `
     # only deploy from AppVeyor
     $CI -eq "AppVeyor" -and
     # only deploy from last Job
-    allJobsFinished
+    (allJobsFinished) -and
     # Travis must have passed as well
-    allCIsFinished
+    (allCIsFinished)
     # only deploy master branch
     $env:APPVEYOR_REPO_BRANCH -eq 'master' -and
     # it cannot be a PR
     (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)) -and
     # it cannot have a commit message that contains "skip-deploy"
     $env:APPVEYOR_REPO_COMMIT_MESSAGE -notlike '*skip-deploy*'
-task Deploy -If (
-    # Only deploy if the master branch changes
-    $env:APPVEYOR_REPO_BRANCH -eq 'master' -and
-    # Do not deploy if this is a pull request (because it hasn't been approved yet)
-    (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)) -and
-    # Do not deploy if the commit contains the string "skip-deploy"
-    # Meant for major/minor version publishes with a .0 build/patch version (like 2.1.0)
-    $env:APPVEYOR_REPO_COMMIT_MESSAGE -notlike '*skip-deploy*'
-) PublishToGallery, UpdateHomepage
+task Deploy -If $shouldDeploy PublishToGallery, UpdateHomepage
 
 task PublishToGallery {
     assert ($env:PSGalleryAPIKey) "No key for the PSGallery"
