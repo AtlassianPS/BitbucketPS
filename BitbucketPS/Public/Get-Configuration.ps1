@@ -30,6 +30,22 @@ function Get-Configuration {
         # Address of the stored server.
         # This all wildchards.
         [Parameter( Mandatory, ParameterSetName = 'ServerDataByUri' )]
+        [ArgumentCompleter(
+            {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+                & $commandName |
+                    Where-Object { $_.Uri -like "$wordToComplete*" } |
+                    ForEach-Object {
+                    [System.Management.Automation.CompletionResult]::new(
+                        $_.Uri,
+                        $_.Uri,
+                        [System.Management.Automation.CompletionResultType]::ParameterValue,
+                        $_.Uri
+                    )
+                }
+            }
+        )]
         [Alias('Url', 'Address')]
         [Uri]
         $Uri,
@@ -37,6 +53,22 @@ function Get-Configuration {
         # Name of the server that was defined when stored.
         # This all wildchards.
         [Parameter( Mandatory, ValueFromPipeline, ParameterSetName = 'ServerDataByName' )]
+        [ArgumentCompleter(
+            {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+                & $commandName |
+                    Where-Object { $_.Name -like "$wordToComplete*" } |
+                    ForEach-Object {
+                    [System.Management.Automation.CompletionResult]::new(
+                        $_.Name,
+                        $_.Name,
+                        [System.Management.Automation.CompletionResultType]::ParameterValue,
+                        $_.Name
+                    )
+                }
+            }
+        )]
         [Alias('Name', 'Alias')]
         [String]
         $ServerName
@@ -68,10 +100,36 @@ function Get-Configuration {
     }
 }
 
-if (Get-Command Register-ArgumentCompleter -ErrorAction Ignore) {
+<# if (Get-Command Register-ArgumentCompleter -ErrorAction Ignore) {
+    # $splat = @{
+    #     CommandName   = (Get-Command "Get-*Configuration" -Module "BitbucketPS")
+    #     # CommandName = "Get-Configuration"
+    #     ParameterName = "ServerName"
+    #     ScriptBlock   = {
+    #         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+    #         Write-Host oi
+    #         # Write-Host (Get-Configuration | Out-String)
+    #         # Get-Configuration |
+    #         #     Where-Object { $_.Name -like "$wordToComplete*" } |
+    #         #     ForEach-Object {
+    #         #         New-CompletionResult -CompletionText $_.Name
+    #         #     }
+    #     }
+    # }
+
     Register-ArgumentCompleter `
         -CommandName (Get-Command "Get-*Configuration" -Module "BitbucketPS") `
-        -Parameter "ServerName" `
-        -ScriptBlock $function:ServerNameCompletion `
-        -Description 'This argument completer handles the -ServerName parameter of the Get-Configuration command.'
-}
+        -ParameterName "ServerName" `
+        -ScriptBlock {
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+
+        Write-Host "oi"
+        # Write-Host (Get-Configuration | Out-String)
+        # Get-Configuration |
+        #     Where-Object { $_.Name -like "$wordToComplete*" } |
+        #     ForEach-Object {
+        #         New-CompletionResult -CompletionText $_.Name
+        #     }
+    }
+} #>

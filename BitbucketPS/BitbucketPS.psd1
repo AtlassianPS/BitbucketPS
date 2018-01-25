@@ -49,8 +49,7 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules      = @(
-        @{ModuleName = "Configuration"; ModuleVersion = "1.2.0"},
-        @{ModuleName = 'TabExpansionPlusPlus'; ModuleVersion = "1.2"}
+        @{ModuleName = "Configuration"; ModuleVersion = "1.2.0"}
     )
 
     # Assemblies that must be loaded prior to importing this module

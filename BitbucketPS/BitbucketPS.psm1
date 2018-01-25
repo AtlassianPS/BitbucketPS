@@ -3,6 +3,9 @@
 if (!("BitbucketPS.Server" -as [Type])) {
     Add-Type -Path (Join-Path $PSScriptRoot BitbucketPS.Types.cs) -ReferencedAssemblies Microsoft.CSharp, Microsoft.PowerShell.Commands.Utility, System.Management.Automation
 }
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+    Add-Type -Path (Join-Path $PSScriptRoot BitbucketPS.Attributes.cs) -ReferencedAssemblies Microsoft.CSharp, Microsoft.PowerShell.Commands.Utility, System.Management.Automation
+}
 
 # Load Web assembly when needed
 # PowerShell Core has the assembly preloaded
@@ -31,7 +34,7 @@ if (-not $script:Configuration.Server) {
 $PublicFunctions = @( Get-ChildItem -Path "$PSScriptRoot/Public/*.ps1" -ErrorAction SilentlyContinue )
 $PrivateFunctions = @( Get-ChildItem -Path "$PSScriptRoot/Private/*.ps1" -ErrorAction SilentlyContinue )
 $ResourceFunctions = @(
-    Get-Item "$PSScriptRoot/BitbucketPS.ArgumentCompleters.ps1"
+    # Get-Item "$PSScriptRoot/BitbucketPS.ArgumentCompleters.ps1"
 )
 
 # Dot source the functions
@@ -47,8 +50,7 @@ ForEach ($file in @($ResourceFunctions + $PublicFunctions + $PrivateFunctions)) 
             $file
         )
         $errorItem.ErrorDetails = "Failed to import function $($file.BaseName)"
-        # Throw $errorItem
-        throw $_
+        throw $errorItem
     }
 }
 #endregion LoadFunctions

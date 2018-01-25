@@ -56,7 +56,7 @@ function Remove-Configuration {
                 $ServerName
             )
             $errorItem.ErrorDetails = "No server '$ServerName' could be found."
-            $Caller.WriteError($errorItem)
+            $PSCmdlet.WriteError($errorItem)
         }
     }
 
