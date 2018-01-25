@@ -54,8 +54,8 @@ install:
     - cmd: git config --global core.autocrlf true
     - cmd: npm install -g markdown-spellcheck
     - cmd: 'echo Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force ^| Out-Null > temp.ps1'
-    - cmd: 'echo Install-Module InvokeBuild -Scope CurrentUser -Force > temp.ps1'
-    - cmd: 'echo $env:releasePath = "$($pwd.Path)\Release" > temp.ps1'
+    - cmd: 'echo Install-Module InvokeBuild -Scope CurrentUser -Force >> temp.ps1'
+    - cmd: 'echo $env:releasePath = "$($pwd.Path)\Release" >> temp.ps1'
     - cmd: if %PowershellVersion:~0,1% gtr 5 (pwsh -File .\temp.ps1) else (powershell -File .\temp.ps1)
 
 before_build:
