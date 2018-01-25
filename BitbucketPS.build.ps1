@@ -222,6 +222,38 @@ task ConvertMarkdown -Partial @ConvertMarkdown InstallPandoc, {process {
 # endregion
 
 # region publish
+function GetBuild() {
+    $headers = @{
+      "Authorization" = "Bearer $env:ApiKey"
+      "Content-type" = "application/json"
+    }
+    Invoke-RestMethod -Uri "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG" -Headers $headers -Method GET
+}
+function allJobsFinished() {
+    $buildData = GetBuild
+    $lastJob = ($buildData.build.jobs | Select -Last 1).jobId
+
+    if ($lastJob -ne $env:APPVEYOR_JOB_ID) {
+        return $false
+    }
+
+    write-host "Waiting for other jobs to complete"
+
+    [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
+    [bool]$success = $false
+
+    while(!$success -and ([datetime]::Now) -lt $stop) {
+        $project = GetBuild
+        $success = $true
+        $project.build.jobs | foreach-object {if (($_.jobId -ne $env:APPVEYOR_JOB_ID) -and ($_.status -ne "success")) {$success = $false}; $_.jobId; $_.status}
+        if (!$success) {Start-sleep 5}
+    }
+
+    if (!$success) {throw "Test jobs were not finished in $env:TimeOutMins minutes"}
+}
+function allCIsFinished() {
+
+}
 # Do not deploy if this is a pull request (because it hasn't been approved yet)
 # Do not deploy if the commit contains the string "skip-deploy"
 # Meant for major/minor version publishes with a .0 build/patch version (like 2.1.0)
@@ -229,9 +261,9 @@ $shouldDeploy = `
     # only deploy from AppVeyor
     $CI -eq "AppVeyor" -and
     # only deploy from last Job
-
+    allJobsFinished
     # Travis must have passed as well
-
+    allCIsFinished
     # only deploy master branch
     $env:APPVEYOR_REPO_BRANCH -eq 'master' -and
     # it cannot be a PR
