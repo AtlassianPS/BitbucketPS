@@ -49,11 +49,11 @@ init:
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
     - git config --global user.email "support@atlassianps.org"
     - git config --global user.name "AtlassianPS automation"
-    - git checkout %APPVEYOR_REPO_BRANCH%
 
 install:
     - cmd: git config --global core.autocrlf true
-    - cmd: npm install -g markdown-spellcheck
+    - cmd: git checkout %APPVEYOR_REPO_BRANCH%
+    # - cmd: npm install -g markdown-spellcheck
     - cmd: 'echo Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force ^| Out-Null > temp.ps1'
     - cmd: 'echo Install-Module InvokeBuild -Scope CurrentUser -Force >> temp.ps1'
     - cmd: 'echo $env:releasePath = "$($pwd.Path)\Release" >> temp.ps1'
