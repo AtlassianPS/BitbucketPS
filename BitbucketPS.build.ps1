@@ -11,7 +11,7 @@ if ($PSBoundParameters.ContainsKey('Verbose')) {
 $releasePath = "$BuildRoot\Release"
 $env:PSModulePath = "$($env:PSModulePath);$releasePath"
 
-"PSGit" | Foreach-Object {if ($_ -notin (Get-Module -ListAvailable)) {Install-Module PSGit -Scope CurrentUser -AllowClobber}}
+Install-Module PSGit -Scope CurrentUser -AllowClobber
 # Install-Module BuildHelpers -Scope CurrentUser -AllowClobber
 # Import-Module BuildHelpers
 
@@ -108,7 +108,7 @@ task ShowDebug {
     }
     Write-Host -Foreground "Gray"
 }
-
+exit
 # Synopsis: Install pandoc to .\Tools\
 task InstallPandoc -If (-not (Test-Path Tools\pandoc.exe)) {
     # Setup

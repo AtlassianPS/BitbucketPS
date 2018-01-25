@@ -49,6 +49,7 @@ init:
     - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
     - git config --global user.email "support@atlassianps.org"
     - git config --global user.name "AtlassianPS automation"
+    - git checkout %APPVEYOR_REPO_BRANCH%
 
 install:
     - cmd: git config --global core.autocrlf true
