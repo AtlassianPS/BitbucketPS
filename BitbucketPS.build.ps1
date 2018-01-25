@@ -30,82 +30,82 @@ $REPO_COMMIT_AUTHOR = if ($env:APPVEYOR_REPO_COMMIT_AUTHOR) {$env:APPVEYOR_REPO_
 
 # region debug information
 task ShowDebug {
-    Write-Build Gray
+    Write-Host -Foreground "Gray"
     switch ($true) {
         $env:APPVEYOR_JOB_ID { $CI = "AppVeyor"; continue }
         $env:TRAVIS { $CI = "Travis"; continue }
         Default { $CI = "local"; continue }
     }
-    Write-Build Gray $CI
-    Write-Build Gray
-    Write-Build Gray ('Project name:               {0}' -f $PROJECT_NAME)
-    Write-Build Gray ('Project root:               {0}' -f $BUILD_FOLDER)
-    Write-Build Gray ('Repo name:                  {0}' -f $REPO_NAME)
-    Write-Build Gray ('Branch:                     {0}' -f $REPO_BRANCH)
-    Write-Build Gray ('Commit:                     {0}' -f $REPO_COMMIT)
-    Write-Build Gray ('  - Author:                 {0}' -f $REPO_COMMIT_AUTHOR)
+    Write-Host $CI -Foreground "Gray"
+    Write-Host -Foreground "Gray"
+    Write-Host ('Project name:               {0}' -f $PROJECT_NAME) -Foreground "Gray"
+    Write-Host ('Project root:               {0}' -f $BUILD_FOLDER) -Foreground "Gray"
+    Write-Host ('Repo name:                  {0}' -f $REPO_NAME) -Foreground "Gray"
+    Write-Host ('Branch:                     {0}' -f $REPO_BRANCH) -Foreground "Gray"
+    Write-Host ('Commit:                     {0}' -f $REPO_COMMIT) -Foreground "Gray"
+    Write-Host ('  - Author:                 {0}' -f $REPO_COMMIT_AUTHOR) -Foreground "Gray"
 
-    Write-Build Gray ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString())
+    Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
     switch ($true) {
         $env:TRAVIS { $OS = $env:TRAVIS_OS_NAME; continue }
         Default { $OS = "Windows"; continue }
     }
-    Write-Build Gray ('OS:                         {0}' -f $OS)
-    Write-Build Gray ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString())
+    Write-Host ('OS:                         {0}' -f $OS) -Foreground "Gray"
+    Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
 
 
     if ($env:APPVEYOR_JOB_ID) {
-        Write-Build Gray ('Commit:                     {0}' -f $env:APPVEYOR_REPO_COMMIT)
-        Write-Build Gray ('  - Author:                 {0}' -f $env:APPVEYOR_REPO_COMMIT_AUTHOR)
-        Write-Build Gray ('  - Time:                   {0}' -f $env:APPVEYOR_REPO_COMMIT_TIMESTAMP)
-        Write-Build Gray ('  - Range:                  {0}' -f '')
-        Write-Build Gray ('  - Message:                {0}' -f $env:APPVEYOR_REPO_COMMIT_MESSAGE)
-        Write-Build Gray ('  - Extended message:       {0}' -f $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)
-        Write-Build Gray ('Pull request number:        {0}' -f $env:APPVEYOR_PULL_REQUEST_NUMBER)
-        Write-Build Gray ('Pull request title:         {0}' -f $env:APPVEYOR_PULL_REQUEST_TITLE)
-        Write-Build Gray ('Pull request SHA:           {0}' -f '')
-        Write-Build Gray ('AppVeyor build ID:          {0}' -f $env:APPVEYOR_BUILD_ID)
-        Write-Build Gray ('AppVeyor build number:      {0}' -f $env:APPVEYOR_BUILD_NUMBER)
-        Write-Build Gray ('AppVeyor build version:     {0}' -f $env:APPVEYOR_BUILD_VERSION)
-        Write-Build Gray ('AppVeyor job ID:            {0}' -f $env:APPVEYOR_JOB_ID)
-        Write-Build Gray ('Build triggered from tag?   {0}' -f $env:APPVEYOR_REPO_TAG)
-        Write-Build Gray ('  - Tag name:               {0}' -f $env:APPVEYOR_REPO_TAG_NAME)
-        Write-Build Gray ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString())
-        Write-Build Gray ('OS:                         {0}' -f 'Windows')
-        Write-Build Gray ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString())
+        Write-Host ('Commit:                     {0}' -f $env:APPVEYOR_REPO_COMMIT) -Foreground "Gray"
+        Write-Host ('  - Author:                 {0}' -f $env:APPVEYOR_REPO_COMMIT_AUTHOR) -Foreground "Gray"
+        Write-Host ('  - Time:                   {0}' -f $env:APPVEYOR_REPO_COMMIT_TIMESTAMP) -Foreground "Gray"
+        Write-Host ('  - Range:                  {0}' -f '') -Foreground "Gray"
+        Write-Host ('  - Message:                {0}' -f $env:APPVEYOR_REPO_COMMIT_MESSAGE) -Foreground "Gray"
+        Write-Host ('  - Extended message:       {0}' -f $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED) -Foreground "Gray"
+        Write-Host ('Pull request number:        {0}' -f $env:APPVEYOR_PULL_REQUEST_NUMBER) -Foreground "Gray"
+        Write-Host ('Pull request title:         {0}' -f $env:APPVEYOR_PULL_REQUEST_TITLE) -Foreground "Gray"
+        Write-Host ('Pull request SHA:           {0}' -f '') -Foreground "Gray"
+        Write-Host ('AppVeyor build ID:          {0}' -f $env:APPVEYOR_BUILD_ID) -Foreground "Gray"
+        Write-Host ('AppVeyor build number:      {0}' -f $env:APPVEYOR_BUILD_NUMBER) -Foreground "Gray"
+        Write-Host ('AppVeyor build version:     {0}' -f $env:APPVEYOR_BUILD_VERSION) -Foreground "Gray"
+        Write-Host ('AppVeyor job ID:            {0}' -f $env:APPVEYOR_JOB_ID) -Foreground "Gray"
+        Write-Host ('Build triggered from tag?   {0}' -f $env:APPVEYOR_REPO_TAG) -Foreground "Gray"
+        Write-Host ('  - Tag name:               {0}' -f $env:APPVEYOR_REPO_TAG_NAME) -Foreground "Gray"
+        Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
+        Write-Host ('OS:                         {0}' -f 'Windows') -Foreground "Gray"
+        Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
     } elseif ($env:TRAVIS) {
-        Write-Build Gray "Using Travis-CI"
-        Write-Build Gray
-        Write-Build Gray ('Project name:               {0}' -f $env:TRAVIS_REPO_SLUG)
-        Write-Build Gray ('Project root:               {0}' -f $env:TRAVIS_BUILD_DIR)
-        Write-Build Gray ('Repo name:                  {0}' -f $env:TRAVIS_REPO_SLUG)
-        Write-Build Gray ('Branch:                     {0}' -f $env:TRAVIS_BRANCH)
-        Write-Build Gray ('Commit:                     {0}' -f $env:TRAVIS_COMMIT)
-        Write-Build Gray ('  - Author:                 {0}' -f '')
-        Write-Build Gray ('  - Time:                   {0}' -f '')
-        Write-Build Gray ('  - Range:                  {0}' -f $env:TRAVIS_COMMIT_RANGE)
-        Write-Build Gray ('  - Message:                {0}' -f $env:TRAVIS_COMMIT_MESSAGE)
-        Write-Build Gray ('  - Extended message:       {0}' -f '')
-        Write-Build Gray ('Pull request number:        {0}' -f $env:TRAVIS_PULL_REQUEST)
-        Write-Build Gray ('Pull request title:         {0}' -f '')
-        Write-Build Gray ('Pull request SHA:           {0}' -f $env:TRAVIS_PULL_REQUEST_SHA)
-        Write-Build Gray ('AppVeyor build ID:          {0}' -f $env:TRAVIS_BUILD_ID)
-        Write-Build Gray ('AppVeyor build number:      {0}' -f $env:TRAVIS_BUILD_NUMBER)
-        Write-Build Gray ('AppVeyor build version:     {0}' -f $env:TRAVIS_BUILD_NUMBER)
-        Write-Build Gray ('AppVeyor job ID:            {0}' -f $env:TRAVIS_JOB_ID)
-        Write-Build Gray ('Build triggered from tag?   {0}' -f ([bool]$env:TRAVIS_TAG))
-        Write-Build Gray ('  - Tag name:               {0}' -f $env:TRAVIS_TAG)
-        Write-Build Gray ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString())
-        Write-Build Gray ('OS:                         {0}' -f $env:TRAVIS_OS_NAME)
-        Write-Build Gray ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString())
+        Write-Host "Using Travis-CI" -Foreground "Gray"
+        Write-Host -Foreground "Gray"
+        Write-Host ('Project name:               {0}' -f $env:TRAVIS_REPO_SLUG) -Foreground "Gray"
+        Write-Host ('Project root:               {0}' -f $env:TRAVIS_BUILD_DIR) -Foreground "Gray"
+        Write-Host ('Repo name:                  {0}' -f $env:TRAVIS_REPO_SLUG) -Foreground "Gray"
+        Write-Host ('Branch:                     {0}' -f $env:TRAVIS_BRANCH) -Foreground "Gray"
+        Write-Host ('Commit:                     {0}' -f $env:TRAVIS_COMMIT) -Foreground "Gray"
+        Write-Host ('  - Author:                 {0}' -f '') -Foreground "Gray"
+        Write-Host ('  - Time:                   {0}' -f '') -Foreground "Gray"
+        Write-Host ('  - Range:                  {0}' -f $env:TRAVIS_COMMIT_RANGE) -Foreground "Gray"
+        Write-Host ('  - Message:                {0}' -f $env:TRAVIS_COMMIT_MESSAGE) -Foreground "Gray"
+        Write-Host ('  - Extended message:       {0}' -f '') -Foreground "Gray"
+        Write-Host ('Pull request number:        {0}' -f $env:TRAVIS_PULL_REQUEST) -Foreground "Gray"
+        Write-Host ('Pull request title:         {0}' -f '') -Foreground "Gray"
+        Write-Host ('Pull request SHA:           {0}' -f $env:TRAVIS_PULL_REQUEST_SHA) -Foreground "Gray"
+        Write-Host ('AppVeyor build ID:          {0}' -f $env:TRAVIS_BUILD_ID) -Foreground "Gray"
+        Write-Host ('AppVeyor build number:      {0}' -f $env:TRAVIS_BUILD_NUMBER) -Foreground "Gray"
+        Write-Host ('AppVeyor build version:     {0}' -f $env:TRAVIS_BUILD_NUMBER) -Foreground "Gray"
+        Write-Host ('AppVeyor job ID:            {0}' -f $env:TRAVIS_JOB_ID) -Foreground "Gray"
+        Write-Host ('Build triggered from tag?   {0}' -f ([bool]$env:TRAVIS_TAG)) -Foreground "Gray"
+        Write-Host ('  - Tag name:               {0}' -f $env:TRAVIS_TAG) -Foreground "Gray"
+        Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
+        Write-Host ('OS:                         {0}' -f $env:TRAVIS_OS_NAME) -Foreground "Gray"
+        Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
     } else {
-        Write-Build Gray "Using local build"
-        Write-Build Gray
-        Write-Build Gray ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString())
-        Write-Build Gray ('OS:                         {0}' -f '')
-        Write-Build Gray ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString())
+        Write-Host "Using local build" -Foreground "Gray"
+        Write-Host -Foreground "Gray"
+        Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
+        Write-Host ('OS:                         {0}' -f '') -Foreground "Gray"
+        Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
     }
-    Write-Build Gray
+    Write-Host -Foreground "Gray"
 }
 
 # Synopsis: Install pandoc to .\Tools\
