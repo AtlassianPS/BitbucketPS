@@ -17,8 +17,16 @@ Import-Module BuildHelpers
 # Ensure Invoke-Build works in the most strict mode.
 Set-StrictMode -Version Latest
 
-$branch = git branch 2>&1 | select-string -Pattern "^\*\s(.+)$" | Foreach-Object { $_.Matches.Groups[1].Value}
-$commit = git log 2>&1 | select-string -Pattern "^commit ([0-9a-f]{7}) \(HEAD ->.*$branch.*$" | Foreach-Object { $_.Matches.Groups[1].Value}
+switch ($true) {
+    {$env:APPVEYOR_JOB_ID} { $CI = "AppVeyor"; continue }
+    {$env:TRAVIS} { $CI = "Travis"; continue }
+    Default {
+        $CI = "local"
+        $branch = git branch 2>&1 | select-string -Pattern "^\*\s(.+)$" | Foreach-Object { $_.Matches.Groups[1].Value}
+        $commit = git log 2>&1 | select-string -Pattern "^commit ([0-9a-f]{7}) \(HEAD ->.*$branch.*$" | Foreach-Object { $_.Matches.Groups[1].Value}
+        continue
+    }
+}
 
 $PROJECT_NAME = if ($env:APPVEYOR_PROJECT_NAME) {$env:APPVEYOR_PROJECT_NAME} elseif ($env:TRAVIS_REPO_SLUG) {$env:TRAVIS_REPO_SLUG} else {Split-Path $BuildRoot -Leaf}
 $BUILD_FOLDER = if ($env:APPVEYOR_BUILD_FOLDER) {$env:APPVEYOR_BUILD_FOLDER} elseif ($env:TRAVIS_BUILD_DIR) {$env:TRAVIS_BUILD_DIR} else {$BuildRoot}
@@ -30,12 +38,7 @@ $REPO_COMMIT_AUTHOR = if ($env:APPVEYOR_REPO_COMMIT_AUTHOR) {$env:APPVEYOR_REPO_
 # region debug information
 task ShowDebug {
     Write-Host -Foreground "Gray"
-    switch ($true) {
-        $env:APPVEYOR_JOB_ID { $CI = "AppVeyor"; continue }
-        $env:TRAVIS { $CI = "Travis"; continue }
-        Default { $CI = "local"; continue }
-    }
-    Write-Host $CI -Foreground "Gray"
+    Write-Host ('Running in:                 {0}' -f $CI) -Foreground "Gray"
     Write-Host -Foreground "Gray"
     Write-Host ('Project name:               {0}' -f $PROJECT_NAME) -Foreground "Gray"
     Write-Host ('Project root:               {0}' -f $BUILD_FOLDER) -Foreground "Gray"
