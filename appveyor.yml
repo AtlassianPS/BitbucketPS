@@ -16,7 +16,7 @@ environment:
         secure: PX1R0Ds6r3TTm+wxVbx8MRAgjCRV/juO3cYSEz1MedB/OXvZ3YkqpQGE+X47bcFT
     fast_finish: true
     matrix:
-        - image: WMF 4
+        # - image: WMF 4
         - image: Visual Studio 2017
         - image: Visual Studio 2017
           PowershellVersion: "6.0.0"
@@ -86,4 +86,4 @@ deploy:
         appveyor_repo_tag: false        # deploy on tag push only
 
 # on_failure:
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
