@@ -5,7 +5,7 @@
 
     .DESCRIPTION
         This function creates a persistent, authenticated session into BitBucket which can be used by all other
-        BitBucketPS functions instead of explicitly passing parameters. This removes the need to use the
+        BitbucketPS functions instead of explicitly passing parameters. This removes the need to use the
         -Credential parameter constantly for each function call.
 
         This is the equivalent of a browser cookie saving login information.

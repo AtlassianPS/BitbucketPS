@@ -1,6 +1,6 @@
 Describe "Set-Configuration" {
 
-    Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
+    Import-Module (Join-Path $PSScriptRoot "../BitbucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
     InModuleScope BitbucketPS {
 

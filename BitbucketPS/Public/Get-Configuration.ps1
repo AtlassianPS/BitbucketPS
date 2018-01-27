@@ -99,37 +99,3 @@ function Get-Configuration {
         Write-Verbose "[$($MyInvocation.MyCommand.Name)] Function ended"
     }
 }
-
-<# if (Get-Command Register-ArgumentCompleter -ErrorAction Ignore) {
-    # $splat = @{
-    #     CommandName   = (Get-Command "Get-*Configuration" -Module "BitbucketPS")
-    #     # CommandName = "Get-Configuration"
-    #     ParameterName = "ServerName"
-    #     ScriptBlock   = {
-    #         param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-
-    #         Write-Host oi
-    #         # Write-Host (Get-Configuration | Out-String)
-    #         # Get-Configuration |
-    #         #     Where-Object { $_.Name -like "$wordToComplete*" } |
-    #         #     ForEach-Object {
-    #         #         New-CompletionResult -CompletionText $_.Name
-    #         #     }
-    #     }
-    # }
-
-    Register-ArgumentCompleter `
-        -CommandName (Get-Command "Get-*Configuration" -Module "BitbucketPS") `
-        -ParameterName "ServerName" `
-        -ScriptBlock {
-        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-
-        Write-Host "oi"
-        # Write-Host (Get-Configuration | Out-String)
-        # Get-Configuration |
-        #     Where-Object { $_.Name -like "$wordToComplete*" } |
-        #     ForEach-Object {
-        #         New-CompletionResult -CompletionText $_.Name
-        #     }
-    }
-} #>

@@ -1,4 +1,4 @@
-#region Dependencies
+﻿#region Dependencies
 # Load the ConfluencePS namespace from C#
 if (!("BitbucketPS.Server" -as [Type])) {
     Add-Type -Path (Join-Path $PSScriptRoot BitbucketPS.Types.cs) -ReferencedAssemblies Microsoft.CSharp, Microsoft.PowerShell.Commands.Utility, System.Management.Automation

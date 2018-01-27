@@ -30,9 +30,6 @@ function defProp {
             defProp $object 'ProcessName' 'powershell'
         }
     #>
-    .SYNOPSIS
-
-    #>
     param($obj, $propName, $propValue)
     It "Defines the '$propName' property" {
         $obj.$propName | Should Be $propValue

@@ -3,13 +3,13 @@ layout: module
 permalink: /module/BitbucketPS/
 ---
 
-# BitBucketPS
+# BitbucketPS
 
-[![GitHub release](https://img.shields.io/github/release/AtlassianPS/BitBucketPS.svg)](https://github.com/AtlassianPS/BitBucketPS/releases/latest) [![Build status](https://ci.appveyor.com/api/projects/status/viulo95g362l6vym/branch/master?svg=true)](https://ci.appveyor.com/project/AtlassianPS/BitBucketPS/branch/master) [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/BitBucketPS.svg)](https://www.powershellgallery.com/packages/BitBucketPS) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![GitHub release](https://img.shields.io/github/release/AtlassianPS/BitbucketPS.svg)](https://github.com/AtlassianPS/BitbucketPS/releases/latest) [![Build status](https://ci.appveyor.com/api/projects/status/viulo95g362l6vym/branch/master?svg=true)](https://ci.appveyor.com/project/AtlassianPS/BitbucketPS/branch/master) [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/BitbucketPS.svg)](https://www.powershellgallery.com/packages/BitbucketPS) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 > **This code is not yet fully implemented.** Any help (including bug reporting) is appreciated.
 
-BitBucketPS is a Windows PowerShell module to interact with [Atlassian Bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
+BitbucketPS is a Windows PowerShell module to interact with [Atlassian Bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
 
 Join the conversation on [![SlackLogo][] AtlassianPS.Slack.com](https://atlassianps.org/slack)
 
@@ -57,7 +57,7 @@ Hopefully this is obvious, but:
 > This is an open source project (under the [MIT license]), and all contributors are volunteers. All commands are executed at your own risk. Please have good backups before you start, because you can delete a lot of stuff if you're not careful.
 
   [PowerShell Gallery]: <https://www.powershellgallery.com/>
-  [Source Code]: <https://github.com/AtlassianPS/BitBucketPS>
-  [Latest Release]: <https://github.com/AtlassianPS/BitBucketPS/releases/latest>
-  [Submit an Issue]: <https://github.com/AtlassianPS/BitBucketPS/issues/new>
-  [MIT license]: <https://github.com/AtlassianPS/BitBucketPS/blob/master/LICENSE>
+  [Source Code]: <https://github.com/AtlassianPS/BitbucketPS>
+  [Latest Release]: <https://github.com/AtlassianPS/BitbucketPS/releases/latest>
+  [Submit an Issue]: <https://github.com/AtlassianPS/BitbucketPS/issues/new>
+  [MIT license]: <https://github.com/AtlassianPS/BitbucketPS/blob/master/LICENSE>
