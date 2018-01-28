@@ -92,6 +92,11 @@
             "problemMatcher": [
                 "$pester"
             ]
+        },
+        {
+            "label": "SetUp",
+            "type": "shell",
+            "command": "Invoke-Build -task SetUp"
         }
     ]
 }
