@@ -28,6 +28,16 @@
         # In case no server was stored, use Set-BitbucketConfiguration.
         # In case the name is not know, use Get-BitbucketConfiguration.
         [Parameter( Mandatory )]
+        [ArgumentCompleter(
+            {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+                $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
+                & $commandName |
+                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+            }
+        )]
+        [Alias('Name', 'Alias')]
         [String]
         $ServerName,
 

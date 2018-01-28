@@ -30,13 +30,31 @@ function Get-Configuration {
         # Address of the stored server.
         # This all wildchards.
         [Parameter( Mandatory, ParameterSetName = 'ServerDataByUri' )]
-        [Alias('Url', 'Address', 'Server')]
+        [ArgumentCompleter(
+            {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+                $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
+                & $commandName |
+                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+            }
+        )]
+        [Alias('Url', 'Address')]
         [Uri]
         $Uri,
 
         # Name of the server that was defined when stored.
         # This all wildchards.
         [Parameter( Mandatory, ValueFromPipeline, ParameterSetName = 'ServerDataByName' )]
+        [ArgumentCompleter(
+            {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+                $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
+                & $commandName |
+                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+            }
+        )]
         [Alias('Name', 'Alias')]
         [String]
         $ServerName
