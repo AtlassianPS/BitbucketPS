@@ -33,10 +33,10 @@ function Get-Configuration {
         [ArgumentCompleter(
             {
                 param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-                $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
-                & $commandName |
-                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
-                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+                $command = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
+                & $command |
+                    Where-Object { $_.Uri -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.Uri, $_.Uri, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.Uri ) }
             }
         )]
         [Alias('Url', 'Address')]
@@ -49,10 +49,10 @@ function Get-Configuration {
         [ArgumentCompleter(
             {
                 param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
-                $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
-                & $commandName |
-                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
-                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+                $command = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
+                & $command |
+                    Where-Object { $_.Name -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.Name, $_.Name, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.Name ) }
             }
         )]
         [Alias('Name', 'Alias')]

@@ -1,4 +1,19 @@
-Function Test-ServerType {
+Function Test-ServerIsCloud {
+    <#
+    .SYNOPSIS
+        Test if a Bitbucket URL is a cloud server or a "on-premise" server
+
+    .DESCRIPTION
+        This tests if a URL is a valid Bitbucket server and of what kind
+
+    .EXAMPLE
+        Test-ServerIsCloud -Uri "http://myserver.com"
+        --------
+        Description
+        Will return true, if the url is a bitbucket cloud server
+        Will return false, if the url is a bitbucket server
+        Will throw an error, if the url is not a bitbucket server
+    #>
     [CmdletBinding()]
     [OutputType([Bool])]
     Param (

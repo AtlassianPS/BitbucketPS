@@ -4,7 +4,7 @@ Describe "Export-Configuration" {
 
     InModuleScope BitbucketPS {
 
-        . "$PSScriptRoot/Shared.ps1"
+        . "$PSScriptRoot/shared.ps1"
 
         #region Mocking
         Mock Import-MqcnAlias {}
@@ -16,7 +16,7 @@ Describe "Export-Configuration" {
         }
 
         Mock Get-BitbucketConfiguration {
-            ShowMockInfo 'Get-BitbucketConfiguration' 'Name','Uri'
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name', 'Uri'
             MockedDebug ($script:Configuration.Server | Out-String)
             $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
         }
@@ -37,13 +37,16 @@ Describe "Export-Configuration" {
         }
         #endregion Mocking
 
-        #region Arrange
-        Set-BitbucketConfiguration -Uri "foo"
-        #endregion Arrange
-
         Context "Sanity checking" { }
 
         Context "Behavior checking" {
+
+            #region Arrange
+            BeforeEach {
+                Set-BitbucketConfiguration -Uri "foo"
+            }
+            #endregion Arrange
+
             It "does not fail on invocation" {
                 { Export-BitbucketConfiguration } | Should Not Throw
             }
@@ -54,7 +57,7 @@ Describe "Export-Configuration" {
             It "does not allow sessions to be exported" {
                 $before = Get-BitbucketConfiguration
                 $after = Export-BitbucketConfiguration
-                $before.Session.UserAgent | Should Be $true
+                $before.Session.UserAgent | Should Not BeNullOrEmpty
                 $after.Session.UserAgent | Should BeNullOrEmpty
             }
         }

@@ -1,5 +1,11 @@
 function Invoke-WebRequest {
     # For Version up to 5.1
+    <#
+    .ForwardHelpTargetName
+        Microsoft.PowerShell.Utility\Invoke-WebRequest
+    .ForwardHelpCategory
+        Cmdlet
+    #>
     [CmdletBinding(HelpUri = 'https://go.microsoft.com/fwlink/?LinkID=217035')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
         "PSAvoidUsingConvertToSecureStringWithPlainText",
@@ -44,7 +50,7 @@ function Invoke-WebRequest {
         ${DisableKeepAlive},
 
         [ValidateRange(0, 2147483647)]
-        [int]
+        [int32]
         ${TimeoutSec},
 
         [System.Collections.IDictionary]
@@ -131,17 +137,17 @@ function Invoke-WebRequest {
             throw
         }
     }
-    <#
-
-    .ForwardHelpTargetName Microsoft.PowerShell.Utility\Invoke-WebRequest
-    .ForwardHelpCategory Cmdlet
-
-    #>
 }
 
 if ($PSVersionTable.PSVersion.Major -ge 6) {
     function Invoke-WebRequest {
         #require -Version 6
+        <#
+        .ForwardHelpTargetName
+            Microsoft.PowerShell.Utility\Invoke-WebRequest
+        .ForwardHelpCategory
+            Cmdlet
+        #>
         [CmdletBinding(DefaultParameterSetName = 'StandardMethod', HelpUri = 'https://go.microsoft.com/fwlink/?LinkID=217035')]
         param(
             [switch]
@@ -196,7 +202,7 @@ if ($PSVersionTable.PSVersion.Major -ge 6) {
             ${DisableKeepAlive},
 
             [ValidateRange(0, 2147483647)]
-            [int]
+            [int32]
             ${TimeoutSec},
 
             [System.Collections.IDictionary]
@@ -304,11 +310,5 @@ if ($PSVersionTable.PSVersion.Major -ge 6) {
                 throw
             }
         }
-        <#
-
-    .ForwardHelpTargetName Microsoft.PowerShell.Utility\Invoke-WebRequest
-    .ForwardHelpCategory Cmdlet
-
-    #>
     }
 }

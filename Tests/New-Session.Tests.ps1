@@ -7,7 +7,7 @@ Describe "New-Session" {
 
     InModuleScope BitbucketPS {
 
-        . "$PSScriptRoot/Shared.ps1"
+        . "$PSScriptRoot/shared.ps1"
 
         #region Mocking
         Mock Invoke-Method { $true }
@@ -36,14 +36,14 @@ Describe "New-Session" {
 
         Context "Behavior checking" {
             It "does not fail on invocation" {
-                { New-BitbucketSession -ServerName "myServer" -Credential $credentials } | Should Not Throw
+                { New-BitbucketSession -Name "myServer" -Credential $credentials } | Should Not Throw
             }
             It "uses Invoke-Method to authenticate" {
-                New-BitbucketSession -ServerName "myServer" -Credential $credentials
+                New-BitbucketSession -Name "myServer" -Credential $credentials
                 Assert-MockCalled -CommandName Invoke-Method -Exactly -Times 1 -Scope It -ParameterFilter {$Method -eq "Get"}
             }
             It "adds the session to an existing server" {
-                New-BitbucketSession -ServerName "myServer" -Credential $credentials
+                New-BitbucketSession -Name "myServer" -Credential $credentials
                 Assert-MockCalled -CommandName Get-Configuration -Exactly -Times 1 -Scope It
                 Assert-MockCalled -CommandName Set-Configuration -Exactly -Times 1 -Scope It
             }

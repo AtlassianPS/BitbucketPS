@@ -20,7 +20,7 @@ function Set-Configuration {
     .LINK
         Export-Configuration
     #>
-    [CmdletBinding()]
+    [CmdletBinding( SupportsShouldProcess = $false )]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '')]
     param(
         # Address of the Bitbucket Server.
@@ -62,7 +62,7 @@ function Set-Configuration {
             Name          = $ServerName
             Uri           = $Uri
             Session       = $Session
-            IsCloudServer = (Test-ServerType -Uri $Uri -ErrorAction Stop)
+            IsCloudServer = (Test-ServerIsCloud -Uri $Uri -ErrorAction Stop)
         }
 
         $newConfiguration = @()

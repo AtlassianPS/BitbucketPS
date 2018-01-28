@@ -20,7 +20,7 @@
         Get-Configuration
         Set-Configuration
     #>
-    [CmdletBinding()]
+    [CmdletBinding( SupportsShouldProcess = $false )]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '')]
     Param(
         # Name with which to identified the Bitbucket Server.
@@ -33,8 +33,8 @@
                 param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
                 $commandName = (Get-Command -Module "BitbucketPS" -Name "Get-*Configuration").Name
                 & $commandName |
-                    Where-Object { $_.$parameterName -like "$wordToComplete*" } |
-                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.$parameterName, $_.$parameterName, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.$parameterName ) }
+                    Where-Object { $_.Name -like "$wordToComplete*" } |
+                    ForEach-Object { [System.Management.Automation.CompletionResult]::new( $_.Name, $_.Name, [System.Management.Automation.CompletionResultType]::ParameterValue, $_.Name ) }
             }
         )]
         [Alias('Name', 'Alias')]
@@ -43,9 +43,11 @@
 
         # Credentials to use to connect to Server.
         [Parameter( Mandatory )]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
         $Credential,
 
+        # Additional headers
         [Hashtable]
         $Headers = @{}
     )

@@ -1,12 +1,20 @@
 function ConvertTo-GetParameter {
     <#
     .SYNOPSIS
-    Generate the GET parameter string for an URL from a hashtable
+        Generate the GET parameter string for an URL from a hashtable
+    .DESCRIPTION
+        Generate the GET parameter string for an URL from a hashtable
+    .EXAMPLE
+        ConvertTo-GetParameter @{pageSize = 30;start=60}
+        -------
+        Description
+        Create a http query string: ?pageSize=30&start=60
     #>
     [CmdletBinding()]
     param (
+        # Key value pair that will create the query
         [Parameter( Position = 0, Mandatory = $true, ValueFromPipeline = $true )]
-        [hashtable]$InputObject
+        [Hashtable]$InputObject
     )
 
     begin {

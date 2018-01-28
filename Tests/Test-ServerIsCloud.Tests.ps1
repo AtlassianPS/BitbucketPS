@@ -1,10 +1,10 @@
-Describe "Test-ServerType" {
+Describe "Test-ServerIsCloud" {
 
     Import-Module (Join-Path $PSScriptRoot "../BitbucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
     InModuleScope BitbucketPS {
 
-        . "$PSScriptRoot/Shared.ps1"
+        . "$PSScriptRoot/shared.ps1"
 
         #region Mocking
         #endregion Mocking
@@ -13,7 +13,7 @@ Describe "Test-ServerType" {
         #endregion Arrange
 
         Context "Sanity checking" {
-            $command = Get-Command -Name Test-ServerType
+            $command = Get-Command -Name Test-ServerIsCloud
 
             defParam $command 'Uri'
             defParam $command 'Headers'

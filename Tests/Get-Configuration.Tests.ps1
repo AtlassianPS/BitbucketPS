@@ -4,7 +4,7 @@ Describe "Get-Configuration" {
 
     InModuleScope BitbucketPS {
 
-        . "$PSScriptRoot/Shared.ps1"
+        . "$PSScriptRoot/shared.ps1"
 
         #region Mocking
         Mock Set-BitbucketConfiguration {
@@ -20,10 +20,6 @@ Describe "Get-Configuration" {
         }
         #endregion Mocking
 
-        #region Arrange
-        Set-BitbucketConfiguration -Uri "foo"
-        #endregion Arrange
-
         Context "Sanity checking" {
             $command = Get-Command -Name Get-BitbucketConfiguration
 
@@ -32,6 +28,13 @@ Describe "Get-Configuration" {
         }
 
         Context "Behavior checking" {
+
+            #region Arrange
+            BeforeEach {
+                Set-BitbucketConfiguration -Uri "foo"
+            }
+            #endregion Arrange
+
             It "does not fail on invocation" {
                 # As this uses values that are not stored, we do not need separate
                 # tests for when no value is found.

@@ -2,11 +2,11 @@
 
 Describe "BitbucketPS" {
 
-    Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
+    Import-Module "$PSScriptRoot/../BitbucketPS/BitbucketPS.psd1" -Prefix "Bitbucket" -Force -ErrorAction Stop
 
     InModuleScope BitbucketPS {
 
-        . "$PSScriptRoot/Shared.ps1"
+        . "$PSScriptRoot/shared.ps1"
 
         $projectRoot = "$PSScriptRoot/.."
         $moduleRoot = "$projectRoot/BitbucketPS"
@@ -30,6 +30,8 @@ Describe "BitbucketPS" {
             # This helps keep me honest and makes sure I'm testing my code appropriately.
 
             $publicFunctions = (Get-Module BitbucketPS).ExportedCommands.Keys
+            # Fix PSv6 linux+OSX bug
+            # $publicFunctions = $publicFunctions | Where-Object { $_ -notin @("Get-ManifestValue", "Update-Manifest") }
 
             It "Includes a test for each PowerShell public function in the module" {
                 foreach ($function in $publicFunctions) {
@@ -62,18 +64,18 @@ Describe "BitbucketPS" {
             # slightly to match BitbucketPS.
 
             $manifest = $null
-            foreach ($line in (Get-Content $changelogFile)) {
-                if ($line -match "(?:version\:|\<h2.*?\>)(?<Version>(\d+\.){1,3}\d+)") {
+            foreach ($line in (Get-Content -Path $changelogFile)) {
+                if ($line -match "(?:##|\<h2.*?\>)\s*(?<Version>(\d+\.?){1,2})") {
                     $changelogVersion = $matches.Version
                     break
                 }
             }
 
-            foreach ($line in (Get-Content $appveyorFile)) {
+            foreach ($line in (Get-Content -Path $appveyorFile)) {
                 # (?<Version>()) - non-capturing group, but named Version. This makes it
                 # easy to reference the inside group later.
 
-                if ($line -match '^\D*(?<Version>(\d+\.){1,2}\d+).\{build\}') {
+                if ($line -match '^\D*(?<Version>(\d+\.){1,3}\d+).\{build\}') {
                     $appveyorVersion = $matches.Version
                     break
                 }
@@ -198,8 +200,7 @@ Describe "BitbucketPS" {
         }
 
         Context 'PSScriptAnalyzer Rules' {
-
-            Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
+            Import-Module $manifestFile -Prefix "Bitbucket" -Force -ErrorAction Stop
 
             $analysis = Invoke-ScriptAnalyzer -Path "$moduleRoot" -Recurse -Settings "$projectRoot/PSScriptAnalyzerSettings.psd1"
             $scriptAnalyzerRules = Get-ScriptAnalyzerRule
@@ -207,7 +208,7 @@ Describe "BitbucketPS" {
             forEach ($rule in $scriptAnalyzerRules) {
                 It "Should pass $rule" {
                     if (($analysis) -and ($analysis.RuleName -contains $rule)) {
-                        $analysis | Where-Object RuleName -EQ $rule -OutVariable failures | Out-Default
+                        $analysis | Where-Object RuleName -eq $rule -OutVariable failures | Out-Default
                         $failures.Count | Should Be 0
                     }
                 }

@@ -3,6 +3,9 @@ function Invoke-Method {
     .SYNOPSIS
         Extracted invokation of the REST method to own function.
 
+    .DESCRIPTION
+        Extracted invokation of the REST method to own function.
+
     .PARAMETER IncludeTotalCount
         NOTE: Not yet implemented.
         Causes an extra output of the total count at the beginning.
@@ -57,7 +60,8 @@ function Invoke-Method {
         # [ValidateSet(
         #     [BitbucketPS.Repository]
         # )]
-        [System.Type]$OutputType,
+        [System.Type]
+        $OutputType,
 
         # Name of the variable in which to save the session
         [String]
@@ -86,7 +90,7 @@ function Invoke-Method {
             else {
                 $Uri = "rest/api/latest{0}" -f $Uri
             }
-            [Uri]$Uri = "{0}/{1}" -f $server.Uri, $Uri
+            [Uri]$Uri = "{0}{1}" -f $server.Uri.AbsoluteUri, $Uri
         }
 
         # pass input to local variable

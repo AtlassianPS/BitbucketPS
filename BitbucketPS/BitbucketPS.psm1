@@ -15,9 +15,16 @@ if (!("System.Web.HttpUtility" -as [Type])) {
 #endregion Dependencies
 
 #region ModuleConfig
-if (Get-Command Add-MetadataConverter -ErrorAction SilentlyContinue) {
-    Add-MetadataConverter @{
-        [BitbucketPS.Server] = { "BitbucketPSServer @{{Name = '{0}'; Uri = '{1}'; IsCloudServer = '{2}'}}" -f $_.Name, $_.Uri, $_.IsCloudServer }
+if (
+    ((Get-Variable -Name IsLinux -ErrorAction Ignore) -and $IsLinux) -or
+    ((Get-Variable -Name IsMacOS -ErrorAction Ignore) -and $IsMacOS)
+) {
+    $fixpath = "$HOME/.local/share/" #workaround for issue#14
+    Import-Module Configuration -Args @($null, $null, $null, $fixpath) -Force
+}
+if (Get-Command Add-MetadataConverter -Module Configuration -ErrorAction SilentlyContinue) {
+    Configuration\Add-MetadataConverter @{
+        [BitbucketPS.Server] = { "BitbucketPSServer @{{Name = '{0}'; Uri = '{1}'; IsCloudServer = '{2}'}}" -f $_.Name, $_.Uri, $(if ($_.IsCloudServer) {'True'} else {''}) }
         "BitbucketPSServer" = { [BitbucketPS.Server]$Args[0] }
     }
 }
@@ -33,16 +40,13 @@ if (-not $script:Configuration.Server) {
 #region LoadFunctions
 $PublicFunctions = @( Get-ChildItem -Path "$PSScriptRoot/Public/*.ps1" -ErrorAction SilentlyContinue )
 $PrivateFunctions = @( Get-ChildItem -Path "$PSScriptRoot/Private/*.ps1" -ErrorAction SilentlyContinue )
-$ResourceFunctions = @(
-    # Get-Item "$PSScriptRoot/BitbucketPS.ArgumentCompleters.ps1"
-)
 
 # Dot source the functions
-ForEach ($file in @($ResourceFunctions + $PublicFunctions + $PrivateFunctions)) {
-    Try {
+foreach ($file in @($PublicFunctions + $PrivateFunctions)) {
+    try {
         . $file.FullName
     }
-    Catch {
+    catch {
         $errorItem = [System.Management.Automation.ErrorRecord]::new(
             ([System.ArgumentException]"Function not found"),
             'Load.Function',
@@ -53,4 +57,5 @@ ForEach ($file in @($ResourceFunctions + $PublicFunctions + $PrivateFunctions)) 
         throw $errorItem
     }
 }
+Export-ModuleMember -Function $PublicFunctions.BaseName
 #endregion LoadFunctions

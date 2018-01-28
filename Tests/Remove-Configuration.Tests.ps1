@@ -8,7 +8,7 @@ Describe "Remove-Configuration" {
 
         #region Mocking
         Mock Get-BitbucketConfiguration {
-            ShowMockInfo 'Get-BitbucketConfiguration' 'Name', 'Uri'
+            ShowMockInfo 'Get-BitbucketConfiguration' 'ServerName', 'Uri'
             MockedDebug ($script:Configuration.Server | Out-String)
             $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
         }
@@ -34,10 +34,6 @@ Describe "Remove-Configuration" {
         }
         #endregion Mocking
 
-        #region Arrange
-        Set-BitbucketConfiguration -Uri "foo"
-        #endregion Arrange
-
         Context "Sanity checking" {
             $command = Get-Command -Name Remove-BitbucketConfiguration
 
@@ -45,6 +41,13 @@ Describe "Remove-Configuration" {
         }
 
         Context "Behavior checking" {
+
+            #region Arrange
+            BeforeEach {
+                Set-BitbucketConfiguration -Uri "foo"
+            }
+            #endregion Arrange
+
             It "does not fail on invocation" {
                 { Remove-BitbucketConfiguration -ServerName "foo" -ErrorAction SilentlyContinue } | Should Not Throw
                 { Remove-BitbucketConfiguration -ServerName "foo" -ErrorAction Stop } | Should Throw
@@ -55,10 +58,10 @@ Describe "Remove-Configuration" {
                 (Get-BitbucketConfiguration).Count | Should Be 2
             }
             It "accepts an object over the pipeline" {
-                (Get-BitbucketConfiguration).Count | Should Be 2
+                (Get-BitbucketConfiguration).Count | Should Be 3
                 (Get-BitbucketConfiguration).Name -contains "Pipe" | Should Be $true
                 Get-BitbucketConfiguration -ServerName "Pipe" | Remove-BitbucketConfiguration
-                (Get-BitbucketConfiguration).Count | Should Be 1
+                (Get-BitbucketConfiguration).Count | Should Be 2
                 (Get-BitbucketConfiguration).Name -contains "Pipe" | Should Be $false
             }
         }

@@ -1,6 +1,7 @@
 [CmdletBinding()]
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingWriteHost', '')]
 param(
+    $ModuleName = (Split-Path $BuildRoot -Leaf),
     $releasePath = "$BuildRoot\Release"
 )
 
@@ -13,12 +14,21 @@ if ($PSBoundParameters.ContainsKey('Debug')) {
     $DebugPreference = "Continue"
 }
 
-$env:PSModulePath = "$($env:PSModulePath);$releasePath"
+try {
+    $script:IsWindows = (-not (Get-Variable -Name IsWindows -ErrorAction Ignore)) -or $IsWindows
+    $script:IsLinux = (Get-Variable -Name IsLinux -ErrorAction Ignore) -and $IsLinux
+    $script:IsMacOS = (Get-Variable -Name IsMacOS -ErrorAction Ignore) -and $IsMacOS
+    $script:IsCoreCLR = $PSVersionTable.ContainsKey('PSEdition') -and $PSVersionTable.PSEdition -eq 'Core'
+}
+catch { }
+
+$PSModulePath = $env:PSModulePath -split ([IO.Path]::PathSeparator)
+if ($releasePath -notin $PSModulePath) {
+    $PSModulePath += $releasePath
+    $env:PSModulePath = $PSModulePath -join ([IO.Path]::PathSeparator)
+}
 
 Set-StrictMode -Version Latest
-
-Install-Module BuildHelpers -Scope CurrentUser
-Import-Module BuildHelpers
 
 function Get-AppVeyorBuild {
     param()
@@ -67,19 +77,30 @@ switch ($true) {
     {$env:APPVEYOR_JOB_ID} {
         $CI = "AppVeyor"
         $OS = "Windows"
-        continue
     }
     {$env:TRAVIS} {
         $CI = "Travis"
         $OS = $env:TRAVIS_OS_NAME
-        continue
     }
-    Default {
+    { (-not($env:APPVEYOR_JOB_ID)) -and (-not($env:TRAVIS)) } {
         $CI = "local"
-        $OS = "Windows"
         $branch = git branch 2>&1 | select-string -Pattern "^\*\s(.+)$" | Foreach-Object { $_.Matches.Groups[1].Value}
         $commit = git log 2>&1 | select-string -Pattern "^commit ([0-9a-f]{7}) \(HEAD ->.*$branch.*$" | Foreach-Object { $_.Matches.Groups[1].Value}
-        continue
+    }
+    {$IsWindows} {
+        $OS = "Windows"
+        if (-not ($IsCoreCLR)) {
+            $OSVersion = $PSVersionTable.BuildVersion.ToString()
+        }
+    }
+    {$IsLinux} {
+        $OS = "Linux"
+    }
+    {$IsMacOs} {
+        $OS = "OSX"
+    }
+    {$IsCoreCLR} {
+        $OSVersion = $PSVersionTable.OS
     }
 }
 
@@ -106,9 +127,9 @@ $REPO_TAG_NAME = if ($env:APPVEYOR_REPO_TAG_NAME) {$env:APPVEYOR_REPO_TAG_NAME} 
 
 #region DebugInformation
 task ShowDebug {
-    Write-Host -Foreground "Gray"
+    Write-Host "" -Foreground "Gray"
     Write-Host ('Running in:                 {0}' -f $CI) -Foreground "Gray"
-    Write-Host -Foreground "Gray"
+    Write-Host "" -Foreground "Gray"
     Write-Host ('Project name:               {0}' -f $PROJECT_NAME) -Foreground "Gray"
     Write-Host ('Project root:               {0}' -f $BUILD_FOLDER) -Foreground "Gray"
     Write-Host ('Repo name:                  {0}' -f $REPO_NAME) -Foreground "Gray"
@@ -119,45 +140,91 @@ task ShowDebug {
     Write-Host ('  - Range:                  {0}' -f $REPO_COMMIT_RANGE) -Foreground "Gray"
     Write-Host ('  - Message:                {0}' -f $REPO_COMMIT_MESSAGE) -Foreground "Gray"
     Write-Host ('  - Extended message:       {0}' -f $REPO_COMMIT_MESSAGE_EXTENDED) -Foreground "Gray"
-    Write-Host ('Pull request number:        {0}' -f $REPO_PULL_REQUEST_NUMBER) -Foreground "Gray"
-    Write-Host ('Pull request title:         {0}' -f $REPO_PULL_REQUEST_TITLE) -Foreground "Gray"
-    Write-Host ('Pull request SHA:           {0}' -f $REPO_PULL_REQUEST_SHA) -Foreground "Gray"
-    Write-Host ('AppVeyor build ID:          {0}' -f $BUILD_ID) -Foreground "Gray"
-    Write-Host ('AppVeyor build number:      {0}' -f $BUILD_NUMBER) -Foreground "Gray"
-    Write-Host ('AppVeyor build version:     {0}' -f $BUILD_VERSION) -Foreground "Gray"
-    Write-Host ('AppVeyor job ID:            {0}' -f $BUILD_JOB_ID) -Foreground "Gray"
+    Write-Host ('Pull request:') -Foreground "Gray"
+    Write-Host ('  - Pull request number:    {0}' -f $REPO_PULL_REQUEST_NUMBER) -Foreground "Gray"
+    Write-Host ('  - Pull request title:     {0}' -f $REPO_PULL_REQUEST_TITLE) -Foreground "Gray"
+    Write-Host ('  - Pull request SHA:       {0}' -f $REPO_PULL_REQUEST_SHA) -Foreground "Gray"
+    Write-Host ('CI data:') -Foreground "Gray"
+    Write-Host ('  - Build ID:               {0}' -f $BUILD_ID) -Foreground "Gray"
+    Write-Host ('  - Build number:           {0}' -f $BUILD_NUMBER) -Foreground "Gray"
+    Write-Host ('  - Build version:          {0}' -f $BUILD_VERSION) -Foreground "Gray"
+    Write-Host ('  - Job ID:                 {0}' -f $BUILD_JOB_ID) -Foreground "Gray"
     Write-Host ('Build triggered from tag?   {0}' -f $REPO_TAG) -Foreground "Gray"
     Write-Host ('  - Tag name:               {0}' -f $REPO_TAG_NAME) -Foreground "Gray"
-    Write-Host -Foreground "Gray"
+    Write-Host "" -Foreground "Gray"
     Write-Host ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString()) -Foreground "Gray"
     Write-Host ('OS:                         {0}' -f $OS) -Foreground "Gray"
-    Write-Host ('OS Version:                 {0}' -f $PSVersionTable.BuildVersion.ToString()) -Foreground "Gray"
-    Write-Host -Foreground "Gray"
+    Write-Host ('OS Version:                 {0}' -f $OSVersion) -Foreground "Gray"
+    Write-Host "" -Foreground "Gray"
 }
 #endregion DebugInformation
 
 #region DependecyTasks
 # Synopsis: Install pandoc to .\Tools\
-task InstallPandoc -If (-not (Test-Path "$BuildRoot/Tools/pandoc.exe")) {
+task InstallPandoc {
     # Setup
     if (-not (Test-Path "$BuildRoot/Tools")) {
         $null = New-Item -Path "$BuildRoot/Tools" -ItemType Directory
     }
 
-    # Get latest bits
-    $latestRelease = "https://github.com/jgm/pandoc/releases/download/1.19.2.1/pandoc-1.19.2.1-windows.msi"
-    Invoke-WebRequest -Uri $latestRelease -OutFile "$($env:temp)\pandoc.msi"
+    if ($OS -like "Windows*") {
+        $path = $env:Path -split ([IO.Path]::PathSeparator)
+        if ("$BuildRoot/Tools" -notin $path) {
+            $path += Join-path $BuildRoot "Tools"
+            $env:Path = $path -join ([IO.Path]::PathSeparator)
+        }
+    }
 
-    # Extract bits
-    $null = New-Item -Path (Join-Path $env:temp 'pandoc.msi') -ItemType Directory -Force
-    Start-Process -Wait -FilePath msiexec.exe -ArgumentList " /qn /a `"$(Join-Path $env:temp 'pandoc.msi')`" targetdir=`"$(Join-Path $env:temp 'pandoc/')`""
+    $pandocVersion = $false
+    try {
+        $pandocVersion = & { pandoc --version }
+    }
+    catch { }
+    If (-not ($pandocVersion)) {
 
-    # Move to Tools folder
-    Copy-Item -Path "$($env:temp)/pandoc/Pandoc/pandoc.exe" -Destination "$BuildRoot/Tools/"
-    Copy-Item -Path "$($env:temp)/pandoc/Pandoc/pandoc-citeproc.exe" -Destination "$BuildRoot/Tools/"
+        $installationFile = "$([System.IO.Path]::GetTempPath()){0}"
 
-    # Clean
-    Remove-Item -Path "$($env:temp)/pandoc" -Recurse -Force
+        # Get latest bits
+        switch -regex ($OS) {
+            "^[wW]indows" {
+                $latestRelease = "https://github.com/jgm/pandoc/releases/download/1.19.2.1/pandoc-1.19.2.1-windows.msi"
+                Invoke-WebRequest -Uri $latestRelease -OutFile ($installationFile -f "pandoc.msi")
+
+                # Extract bits
+                $extractionPath = "$([System.IO.Path]::GetTempPath())pandoc"
+                $null = New-Item -Path $extractionPath -ItemType Directory -Force
+                Start-Process -Wait -FilePath msiexec.exe -ArgumentList " /qn /a `"$($installationFile -f "pandoc.msi")`" targetdir=`"$extractionPath`""
+
+                # Move to Tools folder
+                Copy-Item -Path "$extractionPath/Pandoc/pandoc.exe" -Destination "$BuildRoot/Tools/"
+                Copy-Item -Path "$extractionPath/Pandoc/pandoc-citeproc.exe" -Destination "$BuildRoot/Tools/"
+
+                # Clean
+                Remove-Item -Path ($installationFile -f "pandoc.msi") -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path $extractionPath -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            "^[lL]inux" {
+                $latestRelease = "https://github.com/jgm/pandoc/releases/download/1.19.2.1/pandoc-1.19.2.1-1-amd64.deb"
+                Invoke-WebRequest -Uri $latestRelease -OutFile ($installationFile -f "pandoc.deb")
+
+                sudo dpkg -i $($installationFile -f "pandoc.deb")
+
+                Remove-Item -Path ($installationFile -f "pandoc.deb") -Force -ErrorAction SilentlyContinue
+            }
+            "osx" {
+                $latestRelease = "https://github.com/jgm/pandoc/releases/download/1.19.2.1/pandoc-1.19.2.1-osx.pkg"
+                Invoke-WebRequest -Uri $latestRelease -OutFile ($installationFile -f "pandoc.pkg")
+
+                sudo installer -pkg $($installationFile -f "pandoc.pkg") -target /
+
+                Remove-Item -Path ($installationFile -f "pandoc.deb") -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    $out = & { pandoc --version }
+    if (-not($out)) {throw "Could not install pandoc"}
+
 }
 #endregion DependecyTasks
 
@@ -168,36 +235,39 @@ task Build GenerateRelease, ConvertMarkdown, UpdateManifest
 # Synopsis: Generate .\Release structure
 task GenerateRelease CreateHelp, {
     # Setup
-    if (-not (Test-Path "$releasePath/BitbucketPS")) {
-        $null = New-Item -Path "$releasePath/BitbucketPS" -ItemType Directory
+    if (-not (Test-Path "$releasePath/$ModuleName")) {
+        $null = New-Item -Path "$releasePath/$ModuleName" -ItemType Directory
     }
 
     # Copy module
-    Copy-Item -Path "$BuildRoot/BitbucketPS/*" -Destination "$releasePath/BitbucketPS" -Recurse -Force
+    Copy-Item -Path "$BuildRoot/$ModuleName/*" -Destination "$releasePath/$ModuleName" -Recurse -Force
     # Copy additional files
     Copy-Item -Path @(
         "$BuildRoot/CHANGELOG.md"
         "$BuildRoot/LICENSE"
         "$BuildRoot/README.md"
-    ) -Destination "$releasePath/BitbucketPS" -Force
+    ) -Destination "$releasePath/$ModuleName" -Force
     # Copy Tests
     $null = New-Item -Path "$releasePath/Tests" -ItemType Directory -ErrorAction SilentlyContinue
     Copy-Item -Path "$BuildRoot/Tests/*.ps1" -Destination "$releasePath/Tests" -Recurse -Force
-    Copy-Item -Path "$BuildRoot/PSScriptAnalyzerSettings.psd1" -Destination "$releasePath" -Force
+    # Include Analyzer Settings
+    Copy-Item -Path "$BuildRoot/PSScriptAnalyzerSettings.psd1" -Destination "$releasePath/PSScriptAnalyzerSettings.psd1" -Force
+    Update-MetaData -Path "$releasePath/PSScriptAnalyzerSettings.psd1" -PropertyName ExcludeRules -Value ''
+
 }, CompileModule
 
-task CreateHelp {
+task CreateHelp -If (Get-ChildItem "$BuildRoot/docs/commands" -ErrorAction SilentlyContinue) {
     Install-Module platyPS -Scope CurrentUser
     Import-Module platyPS -Force
-    New-ExternalHelp -Path "$BuildRoot/docs/commands" -OutputPath "$BuildRoot/BitbucketPS/en-US" -Force
-    Remove-Module BitbucketPS, platyPS
+    New-ExternalHelp -Path "$BuildRoot/docs/commands" -OutputPath "$BuildRoot/$ModuleName/en-US" -Force
+    Remove-Module $ModuleName, platyPS
 }
 
 # Synopsis: Compile all functions into the .psm1 file
 task CompileModule {
     $regionsToKeep = @('Dependencies', 'ModuleConfig')
 
-    $targetFile = "$releasePath/BitbucketPS/BitbucketPS.psm1"
+    $targetFile = "$releasePath/$ModuleName/$ModuleName.psm1"
     $content = Get-Content -Encoding UTF8 -LiteralPath $targetFile
     $capture = $false
     $compiled = ""
@@ -215,8 +285,8 @@ task CompileModule {
         }
     }
 
-    $PublicFunctions = @( Get-ChildItem -Path "$releasePath/BitbucketPS/Public/*.ps1" -ErrorAction SilentlyContinue )
-    $PrivateFunctions = @( Get-ChildItem -Path "$releasePath/BitbucketPS/Private/*.ps1" -ErrorAction SilentlyContinue )
+    $PublicFunctions = @( Get-ChildItem -Path "$releasePath/$ModuleName/Public/*.ps1" -ErrorAction SilentlyContinue )
+    $PrivateFunctions = @( Get-ChildItem -Path "$releasePath/$ModuleName/Private/*.ps1" -ErrorAction SilentlyContinue )
 
     foreach ($function in @($PublicFunctions + $PrivateFunctions)) {
         $compiled += (Get-Content -Path $function.FullName -Raw)
@@ -224,40 +294,49 @@ task CompileModule {
     }
 
     Set-Content -LiteralPath $targetFile -Value $compiled -Encoding UTF8 -Force
-    "Private", "Public" | Foreach-Object { Remove-Item -Path "$releasePath/BitbucketPS/$_" -Recurse -Force }
+    "Private", "Public" | Foreach-Object { Remove-Item -Path "$releasePath/$ModuleName/$_" -Recurse -Force }
 }
 
 $ConvertMarkdown = @{
     # <http://johnmacfarlane.net/pandoc/>
-    Inputs  = { Get-ChildItem "$releasePath/BitbucketPS/*.md" -Recurse }
+    Inputs  = { Get-ChildItem "$releasePath/$ModuleName/*.md" -Recurse }
     Outputs = {process {
             [System.IO.Path]::ChangeExtension($_, 'htm')
         }
     }
 }
 # Synopsis: Converts *.md and *.markdown files to *.htm
-task ConvertMarkdown -Partial @ConvertMarkdown InstallPandoc, {process {
-        exec { Tools/pandoc.exe $_ --standalone --from=markdown_github "--output=$2" }
+task ConvertMarkdown -Partial @ConvertMarkdown InstallPandoc, {
+    process {
+        pandoc $_ --standalone --from=markdown_github "--output=$2"
     }
 }, RemoveMarkdownFiles
 
 # Synopsis: Update the manifest of the module
 task UpdateManifest GetVersion, {
-    $ModuleAlias = @(Get-Alias | Where-Object {$_.source -eq "BitbucketPS"})
+    Remove-Module $ModuleName -ErrorAction SilentlyContinue
+    Import-Module "$BuildRoot/$ModuleName/$ModuleName.psd1" -Force
+    $ModuleAlias = @(Get-Alias | Where-Object {$_.ModuleName -eq "$ModuleName"})
 
-    Remove-Module ConfluencePS -ErrorAction SilentlyContinue
-    Import-Module "$releasePath/BitbucketPS/BitbucketPS.psd1" -Force
+    Remove-Module $ModuleName -ErrorAction SilentlyContinue
+    Import-Module $ModuleName -Force
 
-    Update-Metadata -Path "$releasePath/BitbucketPS/BitbucketPS.psd1" -PropertyName ModuleVersion -Value $script:Version
-    # Update-Metadata -Path "$releasePath/BitbucketPS/BitbucketPS.psd1" -PropertyName FileList -Value (Get-ChildItem $BuildRoot/BitbucketPS -Recurse).Name
+    Remove-Module BuildHelpers -ErrorAction SilentlyContinue
+    Import-Module BuildHelpers -Force
+
+    BuildHelpers\Update-Metadata -Path "$releasePath/$ModuleName/$ModuleName.psd1" -PropertyName ModuleVersion -Value $script:Version
+    BuildHelpers\Update-Metadata -Path "$releasePath/$ModuleName/$ModuleName.psd1" -PropertyName FileList -Value (Get-ChildItem "$releasePath/$ModuleName" -Recurse).Name
     if ($ModuleAlias) {
-        Update-Metadata -Path "$releasePath/BitbucketPS/BitbucketPS.psd1" -PropertyName AliasesToExport -Value @($ModuleAlias.Name)
+        BuildHelpers\Update-Metadata -Path "$releasePath/$ModuleName/$ModuleName.psd1" -PropertyName AliasesToExport -Value @($ModuleAlias.Name)
     }
-    Set-ModuleFunctions -Name "$releasePath/BitbucketPS/BitbucketPS.psd1" -FunctionsToExport ([string[]](Get-ChildItem "$BuildRoot\BitbucketPS\Public\*.ps1").BaseName)
+    else {
+        BuildHelpers\Update-Metadata -Path "$releasePath/$ModuleName/$ModuleName.psd1" -PropertyName AliasesToExport -Value ''
+    }
+    BuildHelpers\Set-ModuleFunctions -Name "$releasePath/$ModuleName/$ModuleName.psd1" -FunctionsToExport ([string[]](Get-ChildItem "$BuildRoot\$ModuleName\Public\*.ps1").BaseName)
 }
 
 task GetVersion {
-    $manifestContent = Get-Content -Path "$releasePath/BitbucketPS/BitbucketPS.psd1" -Raw
+    $manifestContent = Get-Content -Path "$releasePath/$ModuleName/$ModuleName.psd1" -Raw
     if ($manifestContent -notmatch '(?<=ModuleVersion\s+=\s+'')(?<ModuleVersion>.*)(?='')') {
         throw "Module version was not found in manifest file."
     }
@@ -276,14 +355,49 @@ task GetVersion {
 #endregion BuildRelease
 
 #region Test
+function allCIsFinished {
+    param()
+
+    if (-not ($env:APPVEYOR_REPO_COMMIT)) {
+        return $true
+    }
+
+    Write-Host "[IDLE] :: waiting on travis to finish"
+
+    [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
+
+    do {
+        $currentBuild = (Get-TravisBuild).builds | Where-Object {$_.commit.sha -eq $env:APPVEYOR_REPO_COMMIT}
+        switch -regex ($currentBuild.state) {
+            "^passed$" {
+                return $true
+            }
+            "^(errored|failed|canceled)" {
+                throw "Travis Job ($($currentBuild.id)) failed"
+            }
+        }
+
+        Start-sleep 5
+    } while (([datetime]::Now) -lt $stop)
+    if (!$currentBuild) {
+        throw "Could not get information about Travis build with sha $REPO_COMMIT"
+    }
+
+    throw "Travis build did not finished in $env:TimeOutMins minutes"
+}
 # Synopsis: Run Pester tests on the module
-task Test {
+task Test Build, {
+    $null = allCIsFinished
+
     assert { Test-Path "$BuildRoot/Release/Tests/" -PathType Container }
+
+    Remove-Module BuildHelpers -ErrorAction SilentlyContinue
+    Import-Module BuildHelpers -Force
 
     try {
         $result = Invoke-Pester -Script "$BuildRoot/Release/Tests/*" -PassThru -OutputFile "$BuildRoot/TestResult.xml" -OutputFormat "NUnitXml"
         if ($CI -eq "AppVeyor") {
-            Add-TestResultToAppveyor -TestFile "$BuildRoot/TestResult.xml"
+            BuildHelpers\Add-TestResultToAppveyor -TestFile "$BuildRoot/TestResult.xml"
         }
         Remove-Item "$BuildRoot/TestResult.xml" -Force
         assert ($result.FailedCount -eq 0) "$($result.FailedCount) Pester test(s) failed."
@@ -304,34 +418,26 @@ function allJobsFinished {
         return $false
     }
 
-    write-host "Waiting for other jobs to complete"
+    write-host "[IDLE] :: waiting for other jobs to complete"
 
     [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
-    [bool]$success = $false
 
-    while (!$success -and ([datetime]::Now) -lt $stop) {
-        $project = GetBuild
-        $success = $true
-        $project.build.jobs | foreach-object {if (($_.jobId -ne $env:APPVEYOR_JOB_ID) -and ($_.status -ne "success")) {$success = $false}; $_.jobId; $_.status}
-        if (!$success) {Start-sleep 5}
-    }
+    do {
+        $project = Get-AppVeyorBuild
+        $continue = @()
+        $project.build.jobs | Where-Object {$_.jobId -ne $env:APPVEYOR_JOB_ID} | Foreach-Object {
+            $job = $_
+            switch -regex ($job.status) {
+                "failed" { throw "AppVeyor's Job ($($job.jobId)) failed." }
+                "(running|success)" { $continue += $true; continue }
+                Default { $continue += $false; Write-Host "new state: $_.status" }
+            }
+        }
+        if ($false -notin $continue) { return $true }
+        Start-sleep 5
+    } while (([datetime]::Now) -lt $stop)
 
-    if (!$success) {throw "Test jobs were not finished in $env:TimeOutMins minutes"}
-}
-function allCIsFinished {
-    param()
-
-    [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
-    [bool]$success = $false
-
-    while (!$success -and ([datetime]::Now) -lt $stop) {
-        $builds = Get-TravisBuild
-        $currentBuild = $builds.builds | Where-Object {$_.commit.sha -eq $env:APPVEYOR_REPO_COMMIT}
-        $success = $currentBuild.state -eq "passed"
-        if (!$success) {Start-sleep 5}
-    }
-    if (!$currentBuild) {throw "Could not get information about Travis build with sha $env:APPVEYOR_REPO_COMMIT"}
-    if (!$success) {throw "Travis build did not finished in $env:TimeOutMins minutes"}
+    throw "Test jobs were not finished in $env:TimeOutMins minutes"
 }
 
 $shouldDeploy = (
@@ -339,8 +445,6 @@ $shouldDeploy = (
     ($CI -eq "AppVeyor") -and
     # only deploy from last Job
     (allJobsFinished) -and
-    # Travis must have passed as well
-    (allCIsFinished) -and
     # only deploy master branch
     ($REPO_BRANCH -eq 'master') -and
     # it cannot be a PR
@@ -348,16 +452,19 @@ $shouldDeploy = (
     # it cannot have a commit message that contains "skip-deploy"
     ($REPO_COMMIT_MESSAGE -notlike '*skip-deploy*')
 )
-task Deploy -If $shouldDeploy PublishToGallery, UpdateHomepage
+# Synopsis: Publish a new release on github, PSGallery and the homepage
+task Deploy -If $shouldDeploy PublishToGallery, UpdateHomepage, GeneratePackage
 
+# Synipsis: Publish the $release to the PSGallery
 task PublishToGallery {
     assert ($env:PSGalleryAPIKey) "No key for the PSGallery"
 
-    Remove-Module BitbucketPS -ErrorAction SilentlyContinue
-    Import-Module $releasePath\BitbucketPS\BitbucketPS.psd1 -ErrorAction Stop
-    Publish-Module -Name BitbucketPS -NuGetApiKey $env:PSGalleryAPIKey
+    Remove-Module $ModuleName -ErrorAction SilentlyContinue
+    Import-Module $ModuleName -ErrorAction Stop
+    Publish-Module -Name $ModuleName -NuGetApiKey $env:PSGalleryAPIKey
 }
 
+# Synopsis: Update the HEAD of this git repo in the homepage repository
 task UpdateHomepage {
     try {
         # Get the repo of the homepage
@@ -371,12 +478,12 @@ task UpdateHomepage {
 
         # Check if this repo was changed
         $status = exec { git status -s 2>&1 }
-        if ($status -contains " M modules/BitbucketPS") {
+        if ($status -contains " M modules/$ModuleName") {
             Write-Host "Has changes"
             # Update the repo in the homepage repo
-            exec { git add modules/BitbucketPS 2>&1 }
+            exec { git add modules/$ModuleName 2>&1 }
             Write-Host "Added"
-            exec { git commit -m "Update module BitbucketPS" 2>&1 }
+            exec { git commit -m "Update module $ModuleName" 2>&1 }
             Write-Host "Commited"
             exec { git push 2>&1 }
             Write-Host "Pushed"
@@ -386,9 +493,16 @@ task UpdateHomepage {
         throw $_
     }
 }
+
+# Synopsis: Create a zip package file of the release
+task GeneratePackage {
+    Compress-Archive -Path "$releasePath\$ModuleName" -DestinationPath "$releasePath\$($ModuleName)-$($script:Version).zip"
+    Write-Host (get-childItem "$releasePath\*.zip" | out-string )
+}
 # endregion
 
 #region Cleaning tasks
+# Synopsis: Clean the working dir
 task Clean RemoveGeneratedFiles
 
 # Synopsis: Remove generated and temp files.
@@ -397,13 +511,13 @@ task RemoveGeneratedFiles {
         'Release'
         '*.htm'
         'TestResult.xml'
-        'BitbucketPS\en-US\*'
+        '$ModuleName\en-US\*'
     )
     Remove-Item $itemsToRemove -Force -Recurse -ErrorAction 0
 }
 
 task RemoveMarkdownFiles {
-    Remove-Item "$releasePath\BitbucketPS\*.md" -Force -ErrorAction 0
+    Remove-Item "$releasePath\$ModuleName\*.md" -Force -ErrorAction 0
 }
 # endregion
 

@@ -2,6 +2,6 @@
     Severity=@('Error','Warning')
     # IncludeRules = @()
     ExcludeRules = @(
-        'PSAvoidAlias'
+        'PSUseToExportFieldsInManifest'
     )
 }
