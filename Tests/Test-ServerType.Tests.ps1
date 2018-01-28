@@ -1,10 +1,10 @@
-Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -ErrorAction Stop
+Describe "Test-ServerType" {
 
-InModuleScope BitbucketPS {
+    Import-Module (Join-Path $PSScriptRoot "../BitbucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
-    . $PSScriptRoot\Shared.ps1
+    InModuleScope BitbucketPS {
 
-    Describe "Test-ServerType" {
+        . "$PSScriptRoot/Shared.ps1"
 
         #region Mocking
         #endregion Mocking

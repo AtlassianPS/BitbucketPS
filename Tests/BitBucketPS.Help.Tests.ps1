@@ -96,14 +96,7 @@ function Get-ParametersDefaultFirst {
     END { }
 }
 
-
-$ModuleBase = "$PSScriptRoot\..\BitBucketPS"
-
-# For tests in .\Tests subdirectory
-if ((Split-Path $ModuleBase -Leaf) -eq 'Tests') {
-    $ModuleBase = Split-Path $ModuleBase -Parent
-}
-
+$ModuleBase = "$PSScriptRoot\..\BitbucketPS"
 
 # Handles modules in version directories
 $leaf = Split-Path $ModuleBase -Leaf
@@ -116,7 +109,7 @@ else {
     $ModuleName = $leaf
 }
 
-foreach ($prefix in @("", "BB")) {
+foreach ($prefix in @("", "Bb")) {
     # Removes all versions of the module from the session before importing
     Get-Module $ModuleName | Remove-Module
 
@@ -171,39 +164,41 @@ foreach ($prefix in @("", "BB")) {
                 # get parameter from the default parameter set, if any.
                 $parameters = Get-ParametersDefaultFirst -Command $command
 
-                $parameterNames = $parameters.Name
-                $HelpParameterNames = $Help.Parameters.Parameter.Name | Sort-Object -Unique
+                if ($parameters) {
+                    $parameterNames = $parameters.Name
+                    $HelpParameterNames = $Help.Parameters.Parameter.Name | Sort-Object -Unique
 
-                foreach ($parameter in $parameters) {
-                    $parameterName = $parameter.Name
-                    $parameterHelp = $Help.parameters.parameter | Where-Object Name -EQ $parameterName
+                    foreach ($parameter in $parameters) {
+                        $parameterName = $parameter.Name
+                        $parameterHelp = $Help.parameters.parameter | Where-Object Name -EQ $parameterName
 
-                    # Should be a description for every parameter
-                    If ($parameterName -notmatch 'Confirm|WhatIf') {
-                        It "gets help for parameter: $parameterName : in $commandName" {
-                            $parameterHelp.Description.Text | Should Not BeNullOrEmpty
+                        # Should be a description for every parameter
+                        If ($parameterName -notmatch 'Confirm|WhatIf') {
+                            It "gets help for parameter: $parameterName : in $commandName" {
+                                $parameterHelp.Description.Text | Should Not BeNullOrEmpty
+                            }
+                        }
+
+                        # Required value in Help should match IsMandatory property of parameter
+                        It "help for $parameterName parameter in $commandName has correct Mandatory value" {
+                            $codeMandatory = $parameter.IsMandatory.toString()
+                            $parameterHelp.Required | Should Be $codeMandatory
+                        }
+
+                        # Parameter type in Help should match code
+                        It "help for $commandName has correct parameter type for $parameterName" {
+                            $codeType = $parameter.ParameterType.Name
+                            # To avoid calling Trim method on a null object.
+                            $helpType = if ($parameterHelp.parameterValue) { $parameterHelp.parameterValue.Trim() }
+                            $helpType | Should be $codeType
                         }
                     }
 
-                    # Required value in Help should match IsMandatory property of parameter
-                    It "help for $parameterName parameter in $commandName has correct Mandatory value" {
-                        $codeMandatory = $parameter.IsMandatory.toString()
-                        $parameterHelp.Required | Should Be $codeMandatory
-                    }
-
-                    # Parameter type in Help should match code
-                    It "help for $commandName has correct parameter type for $parameterName" {
-                        $codeType = $parameter.ParameterType.Name
-                        # To avoid calling Trim method on a null object.
-                        $helpType = if ($parameterHelp.parameterValue) { $parameterHelp.parameterValue.Trim() }
-                        $helpType | Should be $codeType
-                    }
-                }
-
-                foreach ($helpParm in $HelpParameterNames) {
-                    # Shouldn't find extra parameters in help.
-                    It "finds help parameter in code: $helpParm" {
-                        $helpParm -in $parameterNames | Should Be $true
+                    foreach ($helpParm in $HelpParameterNames) {
+                        # Shouldn't find extra parameters in help.
+                        It "finds help parameter in code: $helpParm" {
+                            $helpParm -in $parameterNames | Should Be $true
+                        }
                     }
                 }
             }

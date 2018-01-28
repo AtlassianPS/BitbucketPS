@@ -1,44 +1,58 @@
-Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -ErrorAction Stop
+Describe "Export-Configuration" {
 
-InModuleScope BitbucketPS {
+    Import-Module (Join-Path $PSScriptRoot "../BitbucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
-    . $PSScriptRoot\Shared.ps1
+    InModuleScope BitbucketPS {
 
-    Describe "Export-Configuration" {
+        . "$PSScriptRoot/Shared.ps1"
 
         #region Mocking
-        Mock Export-Configuration -ModuleName "Configuration" {
+        Mock Import-MqcnAlias {}
+
+        function ExportConfiguration {}
+        Mock ExportConfiguration {
+            ShowMockInfo 'ExportConfiguration' 'InputObject'
             $InputObject
+        }
+
+        Mock Get-BitbucketConfiguration {
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name','Uri'
+            MockedDebug ($script:Configuration.Server | Out-String)
+            $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
+        }
+
+        Mock Set-BitbucketConfiguration {
+            $script:Configuration.Server = @()
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name          = "Test1"
+                Uri           = "https://google.com"
+                Session       = ([Microsoft.PowerShell.Commands.WebRequestSession]::new())
+                IsCloudServer = $true
+            }
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name          = "Test2"
+                Uri           = "http://google.com"
+                IsCloudServer = $false
+            }
         }
         #endregion Mocking
 
         #region Arrange
-        $script:Configuration.Server = @()
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test1"
-            Uri  = "https://google.com"
-            Session = ([Microsoft.PowerShell.Commands.WebRequestSession]::new())
-            IsCloudServer = $true
-        }
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test2"
-            Uri  = "http://google.com"
-            IsCloudServer = $false
-        }
+        Set-BitbucketConfiguration -Uri "foo"
         #endregion Arrange
 
         Context "Sanity checking" { }
 
         Context "Behavior checking" {
             It "does not fail on invocation" {
-                {Export-BitbucketConfiguration} | Should Not Throw
+                { Export-BitbucketConfiguration } | Should Not Throw
             }
             It "uses the Configuration module to export the data" {
-                # Export-BitbucketConfiguration
-                # Assert-MockCalled -CommandName "Export-Configuration" -ModuleName "Configuration" -Exactly -Times 1 -Scope It
+                Export-BitbucketConfiguration
+                Assert-MockCalled -CommandName "ExportConfiguration" -ModuleName "BitbucketPS" -Exactly -Times 1 -Scope It
             }
             It "does not allow sessions to be exported" {
-                $before = $script:Configuration.Server
+                $before = Get-BitbucketConfiguration
                 $after = Export-BitbucketConfiguration
                 $before.Session.UserAgent | Should Be $true
                 $after.Session.UserAgent | Should BeNullOrEmpty

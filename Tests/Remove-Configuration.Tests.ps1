@@ -1,42 +1,45 @@
-Import-Module (Join-Path $PSScriptRoot "../BitBucketPS") -Force -ErrorAction Stop
+Describe "Remove-Configuration" {
 
-InModuleScope BitbucketPS {
+    Import-Module (Join-Path $PSScriptRoot "../BitbucketPS") -Prefix "Bitbucket" -Force -ErrorAction Stop
 
-    . $PSScriptRoot\Shared.ps1
+    InModuleScope BitbucketPS {
 
-    Describe "Remove-Configuration" {
+        . "$PSScriptRoot/shared.ps1"
 
         #region Mocking
-        $PSDefaultParameterValues["Mock:ModuleName"] = "BitbucketPS"
-
         Mock Get-BitbucketConfiguration {
-            [BitbucketPS.Server]@{
-                Name = "Pipe"
-                Uri  = "http://google.com"
+            ShowMockInfo 'Get-BitbucketConfiguration' 'Name', 'Uri'
+            MockedDebug ($script:Configuration.Server | Out-String)
+            $script:Configuration.Server | Where-Object { $_.Name -like "$ServerName*" }
+        }
+
+        Mock Set-BitbucketConfiguration {
+            $script:Configuration.Server = @()
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name          = "Test1"
+                Uri           = "https://google.com"
+                Session       = ([Microsoft.PowerShell.Commands.WebRequestSession]::new())
+                IsCloudServer = $true
+            }
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name          = "Test2"
+                Uri           = "http://google.com"
+                IsCloudServer = $false
+            }
+            $script:Configuration.Server += [BitbucketPS.Server]@{
+                Name          = "Pipe"
+                Uri           = "http://google.com"
                 IsCloudServer = $false
             }
         }
         #endregion Mocking
 
         #region Arrange
-        $script:Configuration.Server = @()
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test1"
-            Uri  = "https://google.com"
-        }
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Test2"
-            Uri  = "http://google.com"
-        }
-        $script:Configuration.Server += [BitbucketPS.Server]@{
-            Name = "Pipe"
-            Uri  = "http://google.com"
-            IsCloudServer = $false
-        }
+        Set-BitbucketConfiguration -Uri "foo"
         #endregion Arrange
 
         Context "Sanity checking" {
-            $command = Get-Command -Name Get-BitbucketConfiguration
+            $command = Get-Command -Name Remove-BitbucketConfiguration
 
             defParam $command 'ServerName'
         }
@@ -47,16 +50,16 @@ InModuleScope BitbucketPS {
                 { Remove-BitbucketConfiguration -ServerName "foo" -ErrorAction Stop } | Should Throw
             }
             It "removes one entry of the servers" {
-                $script:Configuration.Server.Count | Should Be 3
+                (Get-BitbucketConfiguration).Count | Should Be 3
                 Remove-BitbucketConfiguration -ServerName "Test2"
-                $script:Configuration.Server.Count | Should Be 2
+                (Get-BitbucketConfiguration).Count | Should Be 2
             }
             It "accepts an object over the pipeline" {
-                $script:Configuration.Server.Count | Should Be 2
-                $script:Configuration.Server.Name -contains "Pipe" | Should Be $true
-                Get-BitbucketConfiguration -ServerName "dummy" | Remove-BitbucketConfiguration
-                $script:Configuration.Server.Count | Should Be 1
-                $script:Configuration.Server.Name -contains "Pipe" | Should Be $false
+                (Get-BitbucketConfiguration).Count | Should Be 2
+                (Get-BitbucketConfiguration).Name -contains "Pipe" | Should Be $true
+                Get-BitbucketConfiguration -ServerName "Pipe" | Remove-BitbucketConfiguration
+                (Get-BitbucketConfiguration).Count | Should Be 1
+                (Get-BitbucketConfiguration).Name -contains "Pipe" | Should Be $false
             }
         }
     }
