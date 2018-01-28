@@ -1,8 +1,8 @@
-Describe "ConvertFrom-Json2" {
+Describe "ConvertFrom-Json" {
     . "$PSScriptRoot/Shared.ps1"
 
     $sampleJson = '{"id":"issuetype","name":"Issue Type","custom":false,"orderable":true,"navigable":true,"searchable":true,"clauseNames":["issuetype","type"],"schema":{"type":"issuetype","system":"issuetype"}}'
-    $sampleObject = ConvertFrom-Json2 -InputObject $sampleJson
+    $sampleObject = ConvertFrom-Json -InputObject $sampleJson
 
     It "Creates a PSObject out of JSON input" {
         $sampleObject | Should Not BeNullOrEmpty
@@ -14,7 +14,7 @@ Describe "ConvertFrom-Json2" {
 
     Context "Sanity checking" {
         It "Does not crash on a null or empty input" {
-            { ConvertFrom-Json2 -InputObject '' } | Should Not Throw
+            { ConvertFrom-Json -InputObject '' } | Should Not Throw
         }
 
         It "Accepts pipeline input" {
