@@ -1,0 +1,22 @@
+# Set merge behavior for the changelog
+CHANGELOG.md merge=union
+
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto eol=crlf
+
+# Explicitly declare text files we want to always be normalized and converted
+# to native line endings on checkout.
+*.md            text
+*.gitattributes text
+*.ps1           text
+*.psm1          text
+*.psd1          text
+*.psc1          text
+*.ps1xml        text
+*.clixml        text
+*.xml           text
+*.txt           text
+
+# Denote all files that are truly binary and should not be mergeable.
+*.dll binary
+*.exe binary
