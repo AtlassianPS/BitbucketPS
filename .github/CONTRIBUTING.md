@@ -1,5 +1,9 @@
 # Contributing to BitbucketPS
 
+> BitbucketPS was retired on 7 October 2026. This repository is archived and no longer accepts issues or pull requests. You can fork it to continue development independently.
+
+The contribution instructions below are preserved for historical reference.
+
 Happy to see you are interested in helping.
 
 We have a comprehensive documentation on how to contribute here: **[Contributing to AtlassianPS](https://atlassianps.org/docs/Contributing/)**.

@@ -5,15 +5,19 @@ permalink: /module/BitbucketPS/
 
 # BitbucketPS
 
-[![GitHub release](https://img.shields.io/github/release/AtlassianPS/BitbucketPS.svg)](https://github.com/AtlassianPS/BitbucketPS/releases/latest) [![Build status](https://ci.appveyor.com/api/projects/status/viulo95g362l6vym/branch/master?svg=true)](https://ci.appveyor.com/project/AtlassianPS/BitbucketPS/branch/master) [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/BitbucketPS.svg)](https://www.powershellgallery.com/packages/BitbucketPS) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![GitHub release](https://img.shields.io/github/release/AtlassianPS/BitbucketPS.svg)](https://github.com/AtlassianPS/BitbucketPS/releases/latest) [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/BitbucketPS.svg)](https://www.powershellgallery.com/packages/BitbucketPS) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-> **This code is not yet fully implemented.** Any help (including bug reporting) is appreciated.
+## Archived
+
+AtlassianPS retired BitbucketPS on 7 October 2026. This module is no longer maintained or supported.
+No further releases, bug fixes, or security updates are planned, and this repository no longer accepts issues or pull requests.
+
+The source, existing issues, and documentation remain available for historical reference.
+You can fork the repository to continue development independently.
+The usage instructions below describe the historical module and may not work with current services.
 
 BitbucketPS is a Windows PowerShell module to interact with [Atlassian Bitbucket](https://www.atlassian.com/software/bitbucket) via a REST API, while maintaining a consistent PowerShell look and feel.
 
-Join the conversation on [![SlackLogo][] AtlassianPS.Slack.com](https://atlassianps.org/slack)
-
-[SlackLogo]: https://atlassianps.org/assets/img/Slack_Mark_Web_28x28.png
 <!--more-->
 
 ---
@@ -38,19 +42,6 @@ Import-Module BitbucketPS
 New-BitBucketSession -Credential (Get-Credential YourUserName)
 ```
 
-### Contribute
-
-Want to contribute to AtlassianPS? Great!
-We appreciate [everyone](https://atlassianps.org/#people) who invests their time to make our modules the best they can be.
-
-Check out our guidelines on [Contributing](https://atlassianps.org/docs/Contributing.html) to our modules and documentation.
-
-## Contact
-
-Feel free to comment on this project here on GitHub using the issues or discussion pages.  You can also check out [my blog](http://beaudry.io) or catch me on [reddit](https://www.reddit.com/u/crossbeau).
-
-*Note:* As with all community PowerShell modules and code, you use BitbucketPS at your own risk.  I am not responsible if your bitbucket instance causes a fire in your datacenter (literal or otherwise).
-
 ## Disclaimer
 
 Hopefully this is obvious, but:
@@ -59,5 +50,4 @@ Hopefully this is obvious, but:
   [PowerShell Gallery]: <https://www.powershellgallery.com/>
   [Source Code]: <https://github.com/AtlassianPS/BitbucketPS>
   [Latest Release]: <https://github.com/AtlassianPS/BitbucketPS/releases/latest>
-  [Submit an Issue]: <https://github.com/AtlassianPS/BitbucketPS/issues/new>
   [MIT license]: <https://github.com/AtlassianPS/BitbucketPS/blob/master/LICENSE>
